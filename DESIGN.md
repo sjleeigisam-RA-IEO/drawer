@@ -32,10 +32,12 @@ The model stage is deliberately simple and legible:
 - transparent volume cues for usable clear space
 - section and plan camera presets
 - floor focus/slice behavior for single-floor inspection
+- parametric core detail for elevator banks, stairs, restrooms, corridors, and MEP risers
 
 Fixed metric cards were removed from the model surface. Metrics now appear as hover tooltips tied to the object under the pointer:
 
 - column: size, height, grid spacing
+- core elements: elevator/stair/restroom/corridor/riser size and role
 - floor/space: area, floor-to-floor height, clear height, ceiling height
 - slab/ceiling/service: relevant vertical build-up values
 

@@ -18,6 +18,25 @@ const materials = {
     depthWrite: false
   }),
   core: new THREE.MeshStandardMaterial({ color: "#b68b62", roughness: 0.7 }),
+  corePartition: new THREE.MeshStandardMaterial({ color: "#d7b083", roughness: 0.74 }),
+  corridor: new THREE.MeshStandardMaterial({
+    color: "#5c7280",
+    emissive: "#17232c",
+    emissiveIntensity: 0.08,
+    roughness: 0.78
+  }),
+  elevatorCab: new THREE.MeshStandardMaterial({
+    color: "#6f879a",
+    metalness: 0.18,
+    roughness: 0.48
+  }),
+  restroom: new THREE.MeshStandardMaterial({
+    color: "#d9e8ec",
+    emissive: "#233941",
+    emissiveIntensity: 0.08,
+    roughness: 0.82
+  }),
+  stair: new THREE.MeshStandardMaterial({ color: "#c58f5a", roughness: 0.72 }),
   column: new THREE.MeshStandardMaterial({ color: "#e6e2d6", roughness: 0.7 }),
   beam: new THREE.MeshStandardMaterial({
     color: "#6f8090",
@@ -168,9 +187,7 @@ function addLevel(root, plan, level, depth, zOffset, options) {
 
   if (options.showStructure) {
     addColumns(root, plan, level, depth, zOffset);
-    if (level.use !== "logistics") {
-      addCore(root, plan, level, depth, zOffset, options);
-    }
+    addCore(root, plan, level, depth, zOffset, options);
   }
 
   addPerimeter(root, plan, level, depth, zOffset, options.section);
@@ -457,21 +474,9 @@ function addCore(root, plan, level, depth, zOffset, options = {}) {
     return;
   }
   const height = level.floorToFloorHeight - (level.slabDepth || 0.25);
-  addBox(
-    root,
-    core.width,
-    height,
-    Math.min(core.depth, depth),
-    core.x,
-    level.y + (level.slabDepth || 0.25) + height / 2,
-    core.z + zOffset,
-    materials.core,
-    "core",
-    createCoreHoverInfo(plan, level)
-  );
-  if (options.section) {
-    addCoreVerticalShafts(root, plan, level, zOffset);
-  }
+  const visibleDepth = Math.min(core.depth, depth);
+  addCoreShell(root, plan, level, zOffset, height, visibleDepth, options);
+  addCoreDetailRooms(root, plan, level, zOffset, height, visibleDepth, options);
 }
 
 function addPerimeter(root, plan, level, depth, zOffset, section) {
@@ -761,30 +766,115 @@ function addCorePlanDetails(root, plan, level, zOffset) {
   addBox(root, core.width, wallHeight, wall, core.x, baseY, back + core.depth, materials.core, "core-wall", coreInfo);
   addBox(root, wall, wallHeight, core.depth, left, baseY, core.z + zOffset, materials.core, "core-wall", coreInfo);
   addBox(root, wall, wallHeight, core.depth, left + core.width, baseY, core.z + zOffset, materials.core, "core-wall", coreInfo);
+  addCoreDetailRooms(root, plan, level, zOffset, wallHeight, core.depth, { planView: true });
+}
+
+function addCoreShell(root, plan, level, zOffset, height, visibleDepth, options = {}) {
+  const core = plan.core;
+  const wall = 0.2;
+  const baseY = level.y + (level.slabDepth || 0.25);
+  const centerY = baseY + height / 2;
+  const left = core.x - core.width / 2;
+  const right = core.x + core.width / 2;
+  const back = core.z + zOffset - visibleDepth / 2;
+  const front = core.z + zOffset + visibleDepth / 2;
+  const coreInfo = createCoreHoverInfo(plan, level);
+  const wallOpening = Math.min(Math.max(core.width * (options.section ? 0.42 : 0.34), 2.8), core.width - wall * 2);
+  const sideWidth = Math.max((core.width - wallOpening) / 2, wall);
+
+  addBox(root, sideWidth, height, wall, left + sideWidth / 2, centerY, back, materials.core, "core-back-wall", coreInfo);
+  addBox(root, sideWidth, height, wall, right - sideWidth / 2, centerY, back, materials.core, "core-back-wall", coreInfo);
+  addBox(root, sideWidth, height, wall, left + sideWidth / 2, centerY, front, materials.core, "core-front-wall", coreInfo);
+  addBox(root, sideWidth, height, wall, right - sideWidth / 2, centerY, front, materials.core, "core-front-wall", coreInfo);
+  addBox(root, wall, height, visibleDepth, left, centerY, core.z + zOffset, materials.core, "core-side-wall", coreInfo);
+  addBox(root, wall, height, visibleDepth, right, centerY, core.z + zOffset, materials.core, "core-side-wall", coreInfo);
+}
+
+function addCoreDetailRooms(root, plan, level, zOffset, height, visibleDepth, options = {}) {
+  const core = plan.core;
+  const baseY = level.y + (level.slabDepth || 0.25) + (options.planView ? 0.08 : 0);
+  const detailHeight = options.planView ? 0.22 : Math.max(Math.min(height * 0.92, height - 0.08), 0.5);
+  const roomY = options.planView ? baseY + 0.18 : baseY + detailHeight / 2;
+  const floorY = baseY + 0.045;
+  const left = core.x - core.width / 2;
+  const right = core.x + core.width / 2;
+  const back = core.z + zOffset - visibleDepth / 2;
+  const front = core.z + zOffset + visibleDepth / 2;
+  const corridorWidth = clamp(core.corridorWidth || Math.min(1.8, core.depth * 0.18), 1.1, Math.max(1.15, visibleDepth * 0.34));
+  const corridorInfo = createGenericHoverInfo(`Core corridor · ${hoverLevelName(level)}`, [
+    { label: "Width", value: formatMeters(corridorWidth) },
+    { label: "Connected zones", value: "EV / stair / restroom / MEP" }
+  ], "#7fa0b5", 5);
+
+  addBox(
+    root,
+    Math.max(core.width - 0.75, 1),
+    options.planView ? 0.06 : 0.08,
+    corridorWidth,
+    core.x,
+    floorY,
+    core.z + zOffset,
+    materials.corridor,
+    "core-corridor",
+    corridorInfo
+  );
 
   const elevatorCount = core.elevators || 2;
-  const elevatorW = Math.min(1.55, core.width / (elevatorCount + 1));
-  const elevatorD = Math.min(1.75, core.depth * 0.22);
+  const elevatorW = Math.min(1.55, Math.max((core.width - 2.6) / Math.max(elevatorCount, 1) - 0.18, 0.95));
+  const elevatorD = Math.min(1.8, visibleDepth * 0.22);
+  const elevatorStartX = core.x - ((elevatorCount - 1) * (elevatorW + 0.28)) / 2;
   for (let index = 0; index < elevatorCount; index += 1) {
-    const x = left + 1.1 + index * (elevatorW + 0.34);
-    addBox(root, elevatorW, 0.2, elevatorD, x, baseY + 0.14, back + 1.35, materials.shaft, "elevator-shaft", createGenericHoverInfo(`EV 샤프트 · ${hoverLevelName(level)}`, [{ label: "크기", value: `${formatMeters(elevatorW)} x ${formatMeters(elevatorD)}` }], "#e5a85f", 4));
+    const x = elevatorStartX + index * (elevatorW + 0.28);
+    const z = back + elevatorD / 2 + 0.7;
+    const evInfo = createGenericHoverInfo(`Elevator · ${hoverLevelName(level)}`, [
+      { label: "Cab / shaft", value: `${formatMeters(elevatorW)} x ${formatMeters(elevatorD)}` },
+      { label: "Travel height", value: formatMeters(detailHeight) },
+      { label: "Bank count", value: String(elevatorCount) }
+    ], "#8caec4", 6);
+    addBox(root, elevatorW, detailHeight, elevatorD, x, roomY, z, materials.shaft, "elevator-shaft", evInfo);
+    addBox(root, elevatorW * 0.82, options.planView ? 0.06 : Math.min(2.1, detailHeight * 0.58), 0.08, x, options.planView ? floorY + 0.05 : baseY + Math.min(1.15, detailHeight * 0.36), z + elevatorD / 2 + 0.055, materials.elevatorCab, "elevator-door", evInfo);
   }
 
-  const stairW = Math.min(2.2, core.width * 0.3);
-  const stairD = Math.min(4.2, core.depth * 0.34);
-  addBox(root, stairW, 0.18, stairD, left + stairW / 2 + 0.7, baseY + 0.2, back + core.depth - stairD / 2 - 0.8, materials.shaft, "stair-core", createGenericHoverInfo(`계단실 · ${hoverLevelName(level)}`, [{ label: "크기", value: `${formatMeters(stairW)} x ${formatMeters(stairD)}` }], "#e5a85f", 4));
-  addStairTreads(root, left + stairW / 2 + 0.7, baseY + 0.36, back + core.depth - stairD / 2 - 0.8, stairW, stairD);
+  const stairCount = core.stairs || 1;
+  const stairW = Math.min(2.25, core.width * 0.24);
+  const stairD = Math.min(4.35, visibleDepth * 0.34);
+  for (let index = 0; index < stairCount; index += 1) {
+    const side = index % 2 === 0 ? -1 : 1;
+    const x = side < 0 ? left + stairW / 2 + 0.65 : right - stairW / 2 - 0.65;
+    const z = front - stairD / 2 - 0.75;
+    const stairInfo = createGenericHoverInfo(`Stair · ${hoverLevelName(level)}`, [
+      { label: "Room", value: `${formatMeters(stairW)} x ${formatMeters(stairD)}` },
+      { label: "Flights", value: detailHeight > 4.8 ? "2" : "1" }
+    ], "#c58f5a", 6);
+    addBox(root, stairW, detailHeight, stairD, x, roomY, z, materials.shaft, "stair-core", stairInfo);
+    addStairTreads(root, x, baseY + (options.planView ? 0.28 : 0.42), z, stairW, stairD, options.planView ? 0.018 : 0.055);
+  }
+
+  const toiletCount = core.toilets || 2;
+  const toiletW = Math.min(2.2, core.width * 0.22);
+  const toiletD = Math.min(2.6, visibleDepth * 0.24);
+  for (let index = 0; index < toiletCount; index += 1) {
+    const x = right - toiletW / 2 - 0.7 - index * (toiletW + 0.22);
+    const z = back + elevatorD + toiletD / 2 + corridorWidth + 0.9;
+    if (x - toiletW / 2 < left + 0.4 || z + toiletD / 2 > front - 0.35) continue;
+    const toiletInfo = createGenericHoverInfo(`Restroom · ${hoverLevelName(level)}`, [
+      { label: "Room", value: `${formatMeters(toiletW)} x ${formatMeters(toiletD)}` },
+      { label: "Fixtures", value: "WC / lavatory" }
+    ], "#d9e8ec", 5);
+    addBox(root, toiletW, detailHeight * 0.78, toiletD, x, baseY + (detailHeight * 0.78) / 2, z, materials.restroom, "restroom-zone", toiletInfo);
+    addToiletFixtures(root, x, baseY, z, toiletW, toiletD, toiletInfo, options.planView);
+  }
 
   const riserCount = core.risers || 2;
   for (let index = 0; index < riserCount; index += 1) {
     addBox(
       root,
       0.55,
-      0.22,
+      options.planView ? 0.22 : Math.max(detailHeight * 0.88, 0.55),
       0.75,
       left + core.width - 1 - index * 0.78,
-      baseY + 0.2,
-      back + core.depth - 1.05,
+      options.planView ? baseY + 0.2 : baseY + Math.max(detailHeight * 0.44, 0.3),
+      front - 1.05,
       materials.duct,
       "mep-riser",
       createServiceHoverInfo(level, "mep-riser", 0.55, 0.22, 0.75)
@@ -792,19 +882,27 @@ function addCorePlanDetails(root, plan, level, zOffset) {
   }
 }
 
-function addStairTreads(root, x, y, z, width, depth) {
+function addToiletFixtures(root, x, baseY, z, width, depth, hoverInfo, isPlanView) {
+  const fixtureHeight = isPlanView ? 0.05 : 0.34;
+  const fixtureY = baseY + fixtureHeight / 2 + 0.05;
+  addBox(root, width * 0.28, fixtureHeight, depth * 0.22, x - width * 0.22, fixtureY, z - depth * 0.18, materials.wall, "toilet-fixture", hoverInfo);
+  addBox(root, width * 0.28, fixtureHeight, depth * 0.22, x + width * 0.22, fixtureY, z - depth * 0.18, materials.wall, "toilet-fixture", hoverInfo);
+  addBox(root, width * 0.62, fixtureHeight * 0.55, depth * 0.14, x, fixtureY + fixtureHeight * 0.25, z + depth * 0.3, materials.elevatorCab, "lavatory-counter", hoverInfo);
+}
+
+function addStairTreads(root, x, y, z, width, depth, treadHeight = 0.04) {
   const count = 7;
   const treadDepth = depth / count;
   for (let index = 0; index < count; index += 1) {
     addBox(
       root,
       width * 0.92,
-      0.04,
+      treadHeight,
       0.035,
       x,
-      y + index * 0.018,
+      y + index * treadHeight * 0.45,
       z - depth / 2 + treadDepth * index,
-      materials.column,
+      materials.stair,
       "stair-tread"
     );
   }
@@ -1199,9 +1297,13 @@ function addBoxEdges(mesh, geometry, name) {
 
 function edgeMaterialFor(name = "") {
   if (name.includes("duct") || name.includes("pipe") || name.includes("service")) return edgeMaterials.service;
-  if (name.includes("core") || name.includes("shaft") || name.includes("riser") || name.includes("stair")) return edgeMaterials.core;
+  if (name.includes("core") || name.includes("shaft") || name.includes("riser") || name.includes("stair") || name.includes("restroom") || name.includes("elevator")) return edgeMaterials.core;
   if (name.includes("beam")) return edgeMaterials.beam;
   return null;
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(Number(value || 0), min), max);
 }
 
 function addWallSegment(root, start, end, thickness, height, y, material, name, hoverInfo = null) {

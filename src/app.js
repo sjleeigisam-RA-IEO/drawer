@@ -1,5 +1,5 @@
-import { samples } from "./samples.js?v=readonly-layout-1";
-import { assetLibrary } from "./asset-library.js?v=readonly-layout-1";
+import { samples } from "./samples.js?v=core-details-1";
+import { assetLibrary } from "./asset-library.js?v=core-details-1";
 import {
   cloneModel,
   duplicateScenario,
@@ -10,15 +10,15 @@ import {
   normalizeModel,
   setScenarioLevelValue,
   summarizeModel
-} from "./schema.js?v=readonly-layout-1";
+} from "./schema.js?v=core-details-1";
 import {
   createDrawingReview,
   markReviewPublished,
   normalizeVectorPackage,
   reviewStatusLabel
-} from "./drawing-schema.js?v=readonly-layout-1";
-import { createReviewModel } from "./modeler.js?v=readonly-layout-1";
-import { ReviewViewer } from "./viewer.js?v=readonly-layout-1";
+} from "./drawing-schema.js?v=core-details-1";
+import { createReviewModel } from "./modeler.js?v=core-details-1";
+import { ReviewViewer } from "./viewer.js?v=core-details-1";
 
 const APP_BOOT_ID = Date.now().toString(36);
 const APP_BASE_URL = new URL("../", import.meta.url);

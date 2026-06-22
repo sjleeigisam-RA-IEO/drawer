@@ -161,6 +161,12 @@ inspection, 3D orbit/section/plan views, floor focus/slice, layer toggles,
 hover metrics, and snapshot/export actions. Parameter editing and direct upload
 are intentionally hidden until the admin update path is implemented.
 
+Core geometry is currently procedural review geometry. The modeler resolves
+`plan.core` into shell walls plus elevator banks, stair rooms, restroom zones,
+core corridor, and MEP risers. If a drawing-derived exact core layout is needed
+later, add optional `plan.core.components[]` records with core-local coordinates
+and keep the procedural layout as the fallback.
+
 ## Asset Mapping
 
 Drawings should attach to the canonical asset identifier, not directly to funds
