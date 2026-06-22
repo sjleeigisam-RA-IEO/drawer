@@ -1,0 +1,190 @@
+{
+  "id": "daechi2-pdf-vector",
+  "version": "ra-vector-drawing/v0.1",
+  "sourceFile": "도면(B1F~19F)_평면도.pdf",
+  "sourceHash": "0fbe9198c194c0574f8969003e2adf8d73fd6f3a6a77f95b417200b684db98dd",
+  "pageCount": 20,
+  "units": "pdf-points",
+  "pages": [
+    {
+      "index": 1,
+      "title": "B1F",
+      "drawingCount": 7809,
+      "width": 1191.0,
+      "height": 842.0,
+      "svg": "pages/page-01.svg",
+      "textPreview": "B1F FLOOR PLAN 2020.05.26 A1:1/100 A3:1/200 SCALE 1 B1F FLOOR PLAN 도면명칭DRAWING TITLE 도면번호SHEET NO. 날짜 DATE 설계구분PROJECT PHASE 설계명PROJECT TITLE 변경/협의사항REVISION REV. DESCRIPTION DATE 축척 SCALE 대치2빌딩 환경개선공사 PIC APPROVED BY : 노트NOTE PM DESIGNED B"
+    },
+    {
+      "index": 2,
+      "title": "1F",
+      "drawingCount": 11846,
+      "width": 1191.0,
+      "height": 842.0,
+      "svg": "pages/page-02.svg",
+      "textPreview": "1F FLOOR PLAN 2020.05 A1:1/100 A3:1/200 SCALE 1 1F FLOOR PLAN 도면명칭DRAWING TITLE 도면번호SHEET NO. 날짜 DATE 설계구분PROJECT PHASE 설계명PROJECT TITLE 변경/협의사항REVISION REV. DESCRIPTION DATE 축척 SCALE 대치2빌딩 환경개선공사 PIC APPROVED BY : 노트NOTE PM DESIGNED BY : 검"
+    },
+    {
+      "index": 3,
+      "title": "2F",
+      "drawingCount": 8460,
+      "width": 1191.0,
+      "height": 842.0,
+      "svg": "pages/page-03.svg",
+      "textPreview": "2F FLOOR PLAN 2020.05 A1:1/100 A3:1/200 SCALE 1 2F FLOOR PLAN 도면명칭DRAWING TITLE 도면번호SHEET NO. 날짜 DATE 설계구분PROJECT PHASE 설계명PROJECT TITLE 변경/협의사항REVISION REV. DESCRIPTION DATE 축척 SCALE 대치2빌딩 환경개선공사 PIC APPROVED BY : 노트NOTE PM DESIGNED BY : 검"
+    },
+    {
+      "index": 4,
+      "title": "3F",
+      "drawingCount": 5773,
+      "width": 1191.0,
+      "height": 842.0,
+      "svg": "pages/page-04.svg",
+      "textPreview": "A1:1/100 A3:1/200 SCALE 1 3F FLOOR PLAN 도면명칭DRAWING TITLE 도면번호SHEET NO. 날짜 DATE 설계구분PROJECT PHASE 설계명PROJECT TITLE 변경/협의사항REVISION REV. DESCRIPTION DATE 축척 SCALE 대치2빌딩 환경개선공사 PIC APPROVED BY : 노트NOTE PM DESIGNED BY : 검토CHECKED BY : 담당DRAWN "
+    },
+    {
+      "index": 5,
+      "title": "4F",
+      "drawingCount": 6176,
+      "width": 1191.0,
+      "height": 842.0,
+      "svg": "pages/page-05.svg",
+      "textPreview": "A1:1/100 A3:1/200 SCALE 1 4F FLOOR PLAN 도면명칭DRAWING TITLE 도면번호SHEET NO. 날짜 DATE 설계구분PROJECT PHASE 설계명PROJECT TITLE 변경/협의사항REVISION REV. DESCRIPTION DATE 축척 SCALE 대치2빌딩 환경개선공사 PIC APPROVED BY : 노트NOTE PM DESIGNED BY : 검토CHECKED BY : 담당DRAWN "
+    },
+    {
+      "index": 6,
+      "title": "5F",
+      "drawingCount": 6176,
+      "width": 1191.0,
+      "height": 842.0,
+      "svg": "pages/page-06.svg",
+      "textPreview": "1 A1:1/100 A3:1/200 SCALE 1 5F FLOOR PLAN 도면명칭DRAWING TITLE 도면번호SHEET NO. 날짜 DATE 설계구분PROJECT PHASE 설계명PROJECT TITLE 변경/협의사항REVISION REV. DESCRIPTION DATE 축척 SCALE 대치2빌딩 환경개선공사 PIC APPROVED BY : 노트NOTE PM DESIGNED BY : 검토CHECKED BY : 담당DRAW"
+    },
+    {
+      "index": 7,
+      "title": "6F",
+      "drawingCount": 6178,
+      "width": 1191.0,
+      "height": 842.0,
+      "svg": "pages/page-07.svg",
+      "textPreview": "A1:1/100 A3:1/200 SCALE 1 6F FLOOR PLAN 도면명칭DRAWING TITLE 도면번호SHEET NO. 날짜 DATE 설계구분PROJECT PHASE 설계명PROJECT TITLE 변경/협의사항REVISION REV. DESCRIPTION DATE 축척 SCALE 대치2빌딩 환경개선공사 PIC APPROVED BY : 노트NOTE PM DESIGNED BY : 검토CHECKED BY : 담당DRAWN "
+    },
+    {
+      "index": 8,
+      "title": "7F",
+      "drawingCount": 6176,
+      "width": 1191.0,
+      "height": 842.0,
+      "svg": "pages/page-08.svg",
+      "textPreview": "A1:1/100 A3:1/200 SCALE 1 7F FLOOR PLAN 도면명칭DRAWING TITLE 도면번호SHEET NO. 날짜 DATE 설계구분PROJECT PHASE 설계명PROJECT TITLE 변경/협의사항REVISION REV. DESCRIPTION DATE 축척 SCALE 대치2빌딩 환경개선공사 PIC APPROVED BY : 노트NOTE PM DESIGNED BY : 검토CHECKED BY : 담당DRAWN "
+    },
+    {
+      "index": 9,
+      "title": "8F",
+      "drawingCount": 6177,
+      "width": 1191.0,
+      "height": 842.0,
+      "svg": "pages/page-09.svg",
+      "textPreview": "A1:1/100 A3:1/200 SCALE 1 8F FLOOR PLAN 도면명칭DRAWING TITLE 도면번호SHEET NO. 날짜 DATE 설계구분PROJECT PHASE 설계명PROJECT TITLE 변경/협의사항REVISION REV. DESCRIPTION DATE 축척 SCALE 대치2빌딩 환경개선공사 PIC APPROVED BY : 노트NOTE PM DESIGNED BY : 검토CHECKED BY : 담당DRAWN "
+    },
+    {
+      "index": 10,
+      "title": "9F",
+      "drawingCount": 6177,
+      "width": 1191.0,
+      "height": 842.0,
+      "svg": "pages/page-10.svg",
+      "textPreview": "1 A1:1/100 A3:1/200 SCALE 1 9F FLOOR PLAN 도면명칭DRAWING TITLE 도면번호SHEET NO. 날짜 DATE 설계구분PROJECT PHASE 설계명PROJECT TITLE 변경/협의사항REVISION REV. DESCRIPTION DATE 축척 SCALE 대치2빌딩 환경개선공사 PIC APPROVED BY : 노트NOTE PM DESIGNED BY : 검토CHECKED BY : 담당DRAW"
+    },
+    {
+      "index": 11,
+      "title": "10F",
+      "drawingCount": 6177,
+      "width": 1191.0,
+      "height": 842.0,
+      "svg": "pages/page-11.svg",
+      "textPreview": "A1:1/100 A3:1/200 SCALE 1 10F FLOOR PLAN 도면명칭DRAWING TITLE 도면번호SHEET NO. 날짜 DATE 설계구분PROJECT PHASE 설계명PROJECT TITLE 변경/협의사항REVISION REV. DESCRIPTION DATE 축척 SCALE 대치2빌딩 환경개선공사 PIC APPROVED BY : 노트NOTE PM DESIGNED BY : 검토CHECKED BY : 담당DRAWN"
+    },
+    {
+      "index": 12,
+      "title": "11F",
+      "drawingCount": 6179,
+      "width": 1191.0,
+      "height": 842.0,
+      "svg": "pages/page-12.svg",
+      "textPreview": "A1:1/100 A3:1/200 SCALE 1 11F FLOOR PLAN 도면명칭DRAWING TITLE 도면번호SHEET NO. 날짜 DATE 설계구분PROJECT PHASE 설계명PROJECT TITLE 변경/협의사항REVISION REV. DESCRIPTION DATE 축척 SCALE 대치2빌딩 환경개선공사 PIC APPROVED BY : 노트NOTE PM DESIGNED BY : 검토CHECKED BY : 담당DRAWN"
+    },
+    {
+      "index": 13,
+      "title": "12F",
+      "drawingCount": 6177,
+      "width": 1191.0,
+      "height": 842.0,
+      "svg": "pages/page-13.svg",
+      "textPreview": "A1:1/100 A3:1/200 SCALE 1 12F FLOOR PLAN 도면명칭DRAWING TITLE 도면번호SHEET NO. 날짜 DATE 설계구분PROJECT PHASE 설계명PROJECT TITLE 변경/협의사항REVISION REV. DESCRIPTION DATE 축척 SCALE 대치2빌딩 환경개선공사 PIC APPROVED BY : 노트NOTE PM DESIGNED BY : 검토CHECKED BY : 담당DRAWN"
+    },
+    {
+      "index": 14,
+      "title": "13F",
+      "drawingCount": 6177,
+      "width": 1191.0,
+      "height": 842.0,
+      "svg": "pages/page-14.svg",
+      "textPreview": "A1:1/100 A3:1/200 SCALE 1 13F FLOOR PLAN 도면명칭DRAWING TITLE 도면번호SHEET NO. 날짜 DATE 설계구분PROJECT PHASE 설계명PROJECT TITLE 변경/협의사항REVISION REV. DESCRIPTION DATE 축척 SCALE 대치2빌딩 환경개선공사 PIC APPROVED BY : 노트NOTE PM DESIGNED BY : 검토CHECKED BY : 담당DRAWN"
+    },
+    {
+      "index": 15,
+      "title": "14F",
+      "drawingCount": 6177,
+      "width": 1191.0,
+      "height": 842.0,
+      "svg": "pages/page-15.svg",
+      "textPreview": "1 A1:1/100 A3:1/200 SCALE 1 14F FLOOR PLAN 도면명칭DRAWING TITLE 도면번호SHEET NO. 날짜 DATE 설계구분PROJECT PHASE 설계명PROJECT TITLE 변경/협의사항REVISION REV. DESCRIPTION DATE 축척 SCALE 대치2빌딩 환경개선공사 PIC APPROVED BY : 노트NOTE PM DESIGNED BY : 검토CHECKED BY : 담당DRA"
+    },
+    {
+      "index": 16,
+      "title": "15F",
+      "drawingCount": 6177,
+      "width": 1191.0,
+      "height": 842.0,
+      "svg": "pages/page-16.svg",
+      "textPreview": "A1:1/100 A3:1/200 SCALE 1 15F FLOOR PLAN 도면명칭DRAWING TITLE 도면번호SHEET NO. 날짜 DATE 설계구분PROJECT PHASE 설계명PROJECT TITLE 변경/협의사항REVISION REV. DESCRIPTION DATE 축척 SCALE 대치2빌딩 환경개선공사 PIC APPROVED BY : 노트NOTE PM DESIGNED BY : 검토CHECKED BY : 담당DRAWN"
+    },
+    {
+      "index": 17,
+      "title": "16F",
+      "drawingCount": 6176,
+      "width": 1191.0,
+      "height": 842.0,
+      "svg": "pages/page-17.svg",
+      "textPreview": "A1:1/100 A3:1/200 SCALE 1 16F FLOOR PLAN 도면명칭DRAWING TITLE 도면번호SHEET NO. 날짜 DATE 설계구분PROJECT PHASE 설계명PROJECT TITLE 변경/협의사항REVISION REV. DESCRIPTION DATE 축척 SCALE 대치2빌딩 환경개선공사 PIC APPROVED BY : 노트NOTE PM DESIGNED BY : 검토CHECKED BY : 담당DRAWN"
+    },
+    {
+      "index": 18,
+      "title": "17F",
+      "drawingCount": 6177,
+      "width": 1191.0,
+      "height": 842.0,
+      "svg": "pages/page-18.svg",
+      "textPreview": "A1:1/100 A3:1/200 SCALE 17F FLOOR PLAN 도면명칭DRAWING TITLE 도면번호SHEET NO. 날짜 DATE 설계구분PROJECT PHASE 설계명PROJECT TITLE 변경/협의사항REVISION REV. DESCRIPTION DATE 축척 SCALE 대치2빌딩 환경개선공사 PIC APPROVED BY : 노트NOTE PM DESIGNED BY : 검토CHECKED BY : 담당DRAWN B"
+    },
+    {
+      "index": 19,
+      "title": "18F",
+      "drawingCount": 6177,
+      "width": 1191.0,
+      "height": 842.0,
+      "svg": "pages/page-19.svg",
+      "textPreview": "1 A1:1/100 A3:1/200 SCALE 18F FLOOR PLAN 도면명칭DRAWING TITLE 도면번호SHEET NO. 날짜 DATE 설계구분PROJECT PHASE 설계명PROJECT TITLE 변경/협의사항REVISION REV. DESCRIPTION DATE 축척 SCALE 대치2빌딩 환경개선공사 PIC APPROVED BY : 노트NOTE PM DESIGNED BY : 검토CHECKED BY : 담당DRAWN"
+    },
+    {
+      "index": 20,
+      "title": "19F",
+      "drawingCount": 7121,
+      "width": 1191.0,
+      "height": 842.0,
+      "svg": "pages/page-20.svg",
+      "textPreview": "1 A1:1/100 A3:1/200 SCALE 19F FLOOR PLAN 도면명칭DRAWING TITLE 도면번호SHEET NO. 날짜 DATE 설계구분PROJECT PHASE 설계명PROJECT TITLE 변경/협의사항REVISION REV. DESCRIPTION DATE 축척 SCALE 대치2빌딩 환경개선공사 PIC APPROVED BY : 노트NOTE PM DESIGNED BY : 검토CHECKED BY : 담당DRAWN"
+    }
+  ]
+}

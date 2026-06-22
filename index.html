@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RA 3D Reviewer</title>
+    <link rel="icon" href="data:," />
+    <script>
+      if (window.location.protocol === "file:") {
+        const params = new URLSearchParams(window.location.search);
+        if (!params.has("mode")) params.set("mode", "library");
+        if (!params.has("assetId")) params.set("assetId", "asset-daechi2-pdf");
+        if (!params.has("stage")) params.set("stage", "drawing");
+        window.location.replace(`http://127.0.0.1:8899/drawing-review/?${params.toString()}`);
+      }
+    </script>
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.164.1/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.164.1/examples/jsm/"
+        }
+      }
+    </script>
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">RA asset review</p>
+          <h1>Parametric 3D Reviewer</h1>
+        </div>
+        <div class="toolbar" aria-label="viewer commands">
+          <button class="icon-button" id="resetCamera" type="button" title="카메라 초기화">
+            <i data-lucide="rotate-ccw"></i>
+          </button>
+          <button class="icon-button" id="snapshot" type="button" title="IM 이미지 저장">
+            <i data-lucide="image-down"></i>
+          </button>
+          <button class="icon-button" id="exportJson" type="button" title="모델 JSON 저장">
+            <i data-lucide="braces"></i>
+          </button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="control-panel">
+          <section class="panel-section asset-picker-section">
+            <div id="libraryControls" class="source-controls">
+              <div class="field-row asset-selector-row">
+                <label for="assetSelect">자산 선택</label>
+                <select id="assetSelect"></select>
+              </div>
+              <div class="source-status" id="assetSourceStatus"></div>
+            </div>
+            <div id="uploadControls" class="source-controls is-hidden" hidden>
+              <label class="file-drop" for="drawingFile">
+                <i data-lucide="upload-cloud"></i>
+                <span id="uploadLabel">PDF/DXF/JSON 파일 선택</span>
+                <input id="drawingFile" type="file" accept=".pdf,.dxf,.dwg,.json,application/json" />
+              </label>
+              <div class="source-status" id="uploadStatus">업로드 파일은 스테이징 상태로 보관됩니다.</div>
+              <div class="source-action-row">
+                <button class="text-button" id="queueExtraction" type="button" disabled>
+                  <i data-lucide="send-to-back"></i>
+                  도면 인식 대기열
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel-section">
+            <div class="field-row is-hidden" id="templateRow" hidden>
+              <label for="sampleSelect">기초 모델</label>
+              <select id="sampleSelect"></select>
+            </div>
+            <div class="field-row is-hidden" hidden>
+              <label for="scenarioSelect">검토안</label>
+              <select id="scenarioSelect"></select>
+            </div>
+            <div class="field-row label-level-row">
+              <label for="labelLevelSelect">층 선택</label>
+              <select id="labelLevelSelect"></select>
+            </div>
+          </section>
+
+          <section class="panel-section">
+            <div class="section-heading">
+              <h2>표시</h2>
+            </div>
+            <div class="switch-grid">
+              <label class="switch-line">
+                <input id="toggleStructure" type="checkbox" checked />
+                <span>구조 프레임</span>
+              </label>
+              <label class="switch-line">
+                <input id="toggleCeilings" type="checkbox" checked />
+                <span>천정/유효고</span>
+              </label>
+              <label class="switch-line">
+                <input id="toggleServices" type="checkbox" checked />
+                <span>설비/덕트</span>
+              </label>
+              <label class="switch-line">
+                <input id="toggleLabels" type="checkbox" checked />
+                <span>호버 수치</span>
+              </label>
+              <label class="switch-line">
+                <input id="toggleSection" type="checkbox" />
+                <span>단면 보기</span>
+              </label>
+            </div>
+          </section>
+
+          <section class="panel-section">
+            <div class="section-heading">
+              <h2>검토 요약</h2>
+            </div>
+            <dl class="metric-list" id="summary"></dl>
+          </section>
+
+          <section class="panel-section">
+            <div class="section-heading">
+              <h2>IM 출력</h2>
+            </div>
+            <div class="shot-grid" id="shotGrid">
+              <button class="shot-button" data-shot="perspective" type="button">투시</button>
+              <button class="shot-button" data-shot="elevation" type="button">입면</button>
+              <button class="shot-button" data-shot="section" type="button">단면</button>
+              <button class="shot-button" data-shot="top" type="button">평면</button>
+            </div>
+          </section>
+
+          <section class="panel-section" hidden>
+            <div class="section-heading">
+              <h2>층별 파라미터</h2>
+              <button class="text-button" id="addScenario" type="button">
+                <i data-lucide="copy-plus"></i>
+                검토안 복제
+              </button>
+            </div>
+            <div class="level-table-wrap">
+              <table class="level-table">
+                <thead>
+                  <tr>
+                    <th>층/구역</th>
+                    <th>용도</th>
+                    <th>반복</th>
+                    <th>층고</th>
+                    <th>슬라브</th>
+                    <th>천정고</th>
+                    <th>유효고</th>
+                    <th>천정속</th>
+                    <th>보</th>
+                  </tr>
+                </thead>
+                <tbody id="levelTable"></tbody>
+              </table>
+            </div>
+          </section>
+        </aside>
+
+        <section class="viewer-panel">
+          <div class="stage-tabs" role="tablist" aria-label="review stage">
+            <button class="stage-tab is-active" data-stage="drawing" type="button">
+              <i data-lucide="scan-line"></i>
+              1. 도면 검토
+            </button>
+            <button class="stage-tab" data-stage="model" type="button">
+              <i data-lucide="box"></i>
+              2. 3D 모델
+            </button>
+          </div>
+
+          <div id="drawingStage" class="drawing-stage">
+            <div class="drawing-toolbar">
+              <div class="field-row compact">
+                <label for="drawingPageSelect">페이지</label>
+                <select id="drawingPageSelect"></select>
+              </div>
+              <div class="zoom-tools" aria-label="drawing zoom">
+                <button class="icon-button small" id="zoomOut" type="button" title="축소">
+                  <i data-lucide="minus"></i>
+                </button>
+                <span id="zoomValue" class="zoom-value">100%</span>
+                <button class="icon-button small" id="zoomIn" type="button" title="확대">
+                  <i data-lucide="plus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="drawing-review-strip">
+              <div class="review-status-item">
+                <span>벡터 패키지</span>
+                <strong id="vectorPackageStatus">대기</strong>
+              </div>
+              <div class="review-status-item">
+                <span>캘리브레이션</span>
+                <strong id="calibrationStatus">대기</strong>
+              </div>
+              <div class="review-status-item">
+                <span>검증</span>
+                <strong id="validationStatus">대기</strong>
+              </div>
+              <button class="text-button publish-button" id="publishModel" type="button" disabled>
+                <i data-lucide="box"></i>
+                3D 모델로 게시
+              </button>
+            </div>
+            <div id="drawingViewport" class="drawing-viewport">
+              <div id="drawingLoadMessage" class="drawing-load-message">도면을 불러오는 중입니다.</div>
+              <img id="drawingImage" alt="vector drawing page" hidden />
+            </div>
+          </div>
+
+          <div id="viewer" class="viewer is-hidden" hidden aria-label="3D building review viewport"></div>
+          <div class="metrics-band" id="metrics"></div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      if (window.location.protocol !== "file:") {
+        import(`./src/app.js?v=${Date.now()}`);
+      }
+    </script>
+  </body>
+</html>
