@@ -551,7 +551,7 @@ async function loadDrawingManifestForActiveAsset() {
     els.drawingPageSelect.innerHTML = drawingState.vectorPackage.pages
       .map(
         (page, index) =>
-          `<option value="${index}">${formatInteger(page.index)}. ${page.title} (${formatInteger(page.drawingCount)})</option>`
+          `<option value="${index}">${formatInteger(page.index)}. ${page.title}</option>`
       )
       .join("");
     els.drawingPageSelect.disabled = false;
