@@ -40,6 +40,9 @@ Fixed metric cards were removed from the model surface. Metrics now appear as ho
 - core elements: elevator/stair/restroom/corridor/riser size and role
 - floor/space: area, floor-to-floor height, clear height, ceiling height
 - slab/ceiling/service: relevant vertical build-up values
+- area zones: estimated sqm/pyeong, zone type, footprint ratio, and drawing-based source note
+
+Area-zone fills and cards stay neutral by default. Purple is reserved for the current hover or selected zone, so the user reads it as a state cue rather than a permanent drawing layer.
 
 ## Visual Semantics
 
@@ -51,5 +54,6 @@ Fixed metric cards were removed from the model surface. Metrics now appear as ho
 - Duct: mint/green service run.
 - Pipe: coral accent.
 - Clear volume: amber transparent usable-space cue.
+- Area zone hover/selection: purple state highlight only.
 
 The palette is intentionally brighter than the initial dark prototype so ducts, slab, and ceiling zones remain distinguishable in screenshots.

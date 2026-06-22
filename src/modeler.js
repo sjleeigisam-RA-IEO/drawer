@@ -85,11 +85,11 @@ const materials = {
     side: THREE.DoubleSide
   }),
   areaZone: new THREE.MeshStandardMaterial({
-    color: "#b96dff",
-    emissive: "#4e1f7a",
-    emissiveIntensity: 0.18,
+    color: "#9aa6ad",
+    emissive: "#000000",
+    emissiveIntensity: 0,
     transparent: true,
-    opacity: 0.32,
+    opacity: 0.018,
     roughness: 0.64,
     side: THREE.DoubleSide,
     depthWrite: false
@@ -108,7 +108,7 @@ const edgeMaterials = {
   service: new THREE.LineBasicMaterial({ color: "#dffff6", transparent: true, opacity: 0.96 }),
   core: new THREE.LineBasicMaterial({ color: "#e5a85f", transparent: true, opacity: 0.86 }),
   beam: new THREE.LineBasicMaterial({ color: "#d5e4ef", transparent: true, opacity: 0.86 }),
-  areaZone: new THREE.LineBasicMaterial({ color: "#e2c2ff", transparent: true, opacity: 0.95 }),
+  areaZone: new THREE.LineBasicMaterial({ color: "#9aa6ad", transparent: true, opacity: 0.16 }),
   dimension: new THREE.LineBasicMaterial({ color: "#f4d074", transparent: true, opacity: 0.9 })
 };
 
@@ -1004,37 +1004,45 @@ function addAreaZones(root, plan, level, zOffset, options = {}) {
   const zones = plan.areaZones.filter((zone) => areaZoneAppliesToLevel(zone, level.sourceLevelId));
   if (!zones.length) return;
   const y = level.y + (level.slabDepth || 0.12) + 0.052;
-  const shouldLabel = options.planView || options.focusLevelActive;
+  const shouldLabel = false;
 
   for (const zone of zones) {
     const area = areaZoneArea(zone);
     if (!area) continue;
     const hoverInfo = createAreaZoneHoverInfo(plan, zone, area, level);
-    let center = [Number(zone.x || 0), Number(zone.z || 0) + zOffset];
-    let mesh = null;
+    const centers = [];
 
-    if (Array.isArray(zone.points) && zone.points.length >= 3) {
-      const outline = zone.points.map(([x, z]) => [x, z + zOffset]);
-      center = polygonCentroid(outline);
-      mesh = addShapePlane(root, outline, y, materials.areaZone, "area-zone", hoverInfo);
-      addAreaZoneOutline(root, outline, y + 0.018);
-    } else {
-      const width = Number(zone.width || 0);
-      const depth = Number(zone.depth || 0);
-      if (width <= 0 || depth <= 0) continue;
-      const x = Number(zone.x || 0);
-      const z = Number(zone.z || 0) + zOffset;
-      mesh = addBox(root, width, 0.035, depth, x, y, z, materials.areaZone, "area-zone", hoverInfo);
-      mesh.castShadow = false;
-      mesh.renderOrder = 4;
-      addAreaZoneRectOutline(root, x, z, width, depth, y + 0.028);
+    for (const segment of areaZoneSegments(zone)) {
+      let center = [Number(segment.x || 0), Number(segment.z || 0) + zOffset];
+      let mesh = null;
+
+      if (Array.isArray(segment.points) && segment.points.length >= 3) {
+        const outline = segment.points.map(([x, z]) => [x, z + zOffset]);
+        center = polygonCentroid(outline);
+        mesh = addShapePlane(root, outline, y, createAreaZoneMaterial(), "area-zone", hoverInfo);
+        addAreaZoneOutline(root, outline, y + 0.018, zone);
+      } else {
+        const width = Number(segment.width || 0);
+        const depth = Number(segment.depth || 0);
+        if (width <= 0 || depth <= 0) continue;
+        const x = Number(segment.x || 0);
+        const z = Number(segment.z || 0) + zOffset;
+        mesh = addBox(root, width, 0.035, depth, x, y, z, createAreaZoneMaterial(), "area-zone", hoverInfo);
+        mesh.castShadow = false;
+        mesh.renderOrder = 4;
+        addAreaZoneRectOutline(root, x, z, width, depth, y + 0.028, zone);
+      }
+
+      if (mesh) {
+        markAreaZoneObject(mesh, zone, "fill");
+        mesh.receiveShadow = false;
+        mesh.renderOrder = 4;
+        centers.push(center);
+      }
     }
 
-    if (mesh) {
-      mesh.receiveShadow = false;
-      mesh.renderOrder = 4;
-    }
-    if (shouldLabel) {
+    if (shouldLabel && centers.length) {
+      const center = polygonCentroid(centers);
       addLabelSprite(root, [zone.name || "구획", formatArea(area)], [center[0], y + 0.32, center[1]], {
         accent: "#b96dff",
         width: 6.6,
@@ -1052,7 +1060,7 @@ function areaZoneAppliesToLevel(zone, levelId) {
 function createAreaZoneHoverInfo(plan, zone, area, level) {
   const footprint = planFloorArea(plan);
   const ratio = footprint ? (area / footprint) * 100 : 0;
-  return createGenericHoverInfo(
+  const info = createGenericHoverInfo(
     `${zone.name || "구획"} · ${hoverLevelName(level)}`,
     [
       { label: "산정 면적", value: formatArea(area) },
@@ -1063,12 +1071,22 @@ function createAreaZoneHoverInfo(plan, zone, area, level) {
     "#b96dff",
     7
   );
+  info.areaZoneId = String(zone.id || "");
+  return info;
 }
 
 function areaZoneArea(zone) {
   if (Number.isFinite(Number(zone.area))) return Number(zone.area);
+  if (Array.isArray(zone.segments) && zone.segments.length) {
+    return zone.segments.reduce((sum, segment) => sum + areaZoneArea(segment), 0);
+  }
   if (Array.isArray(zone.points) && zone.points.length >= 3) return polygonArea(zone.points);
   return Number(zone.width || 0) * Number(zone.depth || 0);
+}
+
+function areaZoneSegments(zone) {
+  if (Array.isArray(zone.segments) && zone.segments.length) return zone.segments;
+  return [zone];
 }
 
 function areaZoneTypeLabel(type) {
@@ -1087,7 +1105,7 @@ function areaZoneTypeLabel(type) {
   );
 }
 
-function addAreaZoneRectOutline(root, x, z, width, depth, y) {
+function addAreaZoneRectOutline(root, x, z, width, depth, y, zone = null) {
   const halfW = width / 2;
   const halfD = depth / 2;
   addAreaZoneOutline(
@@ -1098,17 +1116,39 @@ function addAreaZoneRectOutline(root, x, z, width, depth, y) {
       [x + halfW, z + halfD],
       [x - halfW, z + halfD]
     ],
-    y
+    y,
+    zone
   );
 }
 
-function addAreaZoneOutline(root, outline, y) {
+function addAreaZoneOutline(root, outline, y, zone = null) {
   const points = outline.map(([x, z]) => new THREE.Vector3(x, y, z));
   const geometry = new THREE.BufferGeometry().setFromPoints(points);
-  const line = new THREE.LineLoop(geometry, edgeMaterials.areaZone);
+  const line = new THREE.LineLoop(geometry, createAreaZoneOutlineMaterial());
   line.name = "area-zone-outline";
   line.renderOrder = 5;
+  markAreaZoneObject(line, zone, "outline");
   root.add(line);
+  return line;
+}
+
+function createAreaZoneMaterial() {
+  const material = materials.areaZone.clone();
+  material.userData.disposeWithObject = true;
+  return material;
+}
+
+function createAreaZoneOutlineMaterial() {
+  const material = edgeMaterials.areaZone.clone();
+  material.userData.disposeWithObject = true;
+  return material;
+}
+
+function markAreaZoneObject(object, zone, part) {
+  if (!object || !zone?.id) return object;
+  object.userData.areaZoneId = String(zone.id);
+  object.userData.areaZonePart = part;
+  return object;
 }
 
 function polygonCentroid(points) {

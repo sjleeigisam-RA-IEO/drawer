@@ -224,14 +224,24 @@ export const samples = [
         areaZones: [
           {
             id: "daechi-office-net",
-            name: "업무 전용 추정구역",
+            name: "업무 전용 가능구역",
             type: "office",
             levelIds: ["secondFloor", "officeTypical"],
-            x: 3.1,
-            z: 2.4,
-            width: 22.8,
-            depth: 27.6,
-            sourceNote: "외곽 치수-코어 배치 기반"
+            segments: [
+              { x: 7.7, z: 0, width: 15.8, depth: 35.9 },
+              { x: -7.9, z: 12.125, width: 15.4, depth: 11.65 },
+              { x: -13.3, z: -1.5, width: 4.6, depth: 15.6 },
+              {
+                points: [
+                  [-11.8, -17.95],
+                  [-0.2, -17.95],
+                  [-0.2, -9.3],
+                  [-15.6, -9.3],
+                  [-15.6, -12.9]
+                ]
+              }
+            ],
+            sourceNote: "외곽 1,110.5㎡에서 코어/공용부 168.5㎡ 차감"
           },
           {
             id: "daechi-core-common",

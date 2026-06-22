@@ -46,6 +46,8 @@ const state = {
   uploadState: "empty",
   scenarioId: "base",
   activeShot: "perspective",
+  activeAreaZoneId: "",
+  hoveredAreaZoneId: "",
   options: {
     showStructure: true,
     showCeilings: true,
@@ -180,6 +182,11 @@ function bindEvents() {
     }
   });
 
+  els.viewer.addEventListener("area-zone-hover", (event) => {
+    state.hoveredAreaZoneId = event.detail?.zoneId || "";
+    syncZoneAreaCards();
+  });
+
   els.zoomOut.addEventListener("click", () => {
     drawingState.zoom = Math.max(0.5, drawingState.zoom - 0.25);
     renderDrawingZoom();
@@ -229,6 +236,7 @@ function bindEvents() {
     state.model = normalizeModel(cloneModel(selected.model));
     state.scenarioId = state.model.scenarios[0].id;
     state.options.focusLevelActive = false;
+    clearAreaZoneState();
     renderScenarioOptions();
     renderLabelLevelOptions();
     renderLevelTable();
@@ -688,6 +696,7 @@ function updateScene(options = {}) {
   const reviewViewer = getViewer();
   reviewViewer.setModel(group);
   reviewViewer.setHoverEnabled(state.options.showLabels);
+  reviewViewer.setActiveAreaZone(state.activeAreaZoneId);
   if (state.activeShot) {
     reviewViewer.setCameraPreset(state.activeShot);
   }
@@ -821,18 +830,23 @@ function renderInsightPanels(activeSummary) {
 function renderZoneAreaInsight(zones, plan) {
   if (!els.zoneAreaInsight) return;
   if (!zones.length) {
+    clearAreaZoneState();
     els.zoneAreaInsight.innerHTML = `<div class="zone-empty">선택 층에 등록된 구획 산정값이 없습니다.</div>`;
     return;
   }
+  const visibleIds = new Set(zones.map((zone) => String(zone.id || "")));
+  if (state.activeAreaZoneId && !visibleIds.has(state.activeAreaZoneId)) clearAreaZoneState();
   const basis = plan.areaBasisNote || "도면 외곽/코어/그리드 치수 기반";
   els.zoneAreaInsight.innerHTML = [
     `<div class="zone-basis">${escapeHtml(basis)}</div>`,
     ...zones.map((zone) => {
+      const zoneId = String(zone.id || "");
       const area = zoneArea(zone);
       const footprint = planFloorArea(plan);
       const ratio = footprint ? (area / footprint) * 100 : 0;
+      const selected = zoneId && zoneId === state.activeAreaZoneId;
       return `
-        <div class="zone-area-card">
+        <div class="zone-area-card${selected ? " is-selected" : ""}" data-zone-id="${escapeHtml(zoneId)}" role="button" tabindex="0" aria-pressed="${selected ? "true" : "false"}">
           <div class="zone-area-head">
             <span class="zone-swatch"></span>
             <strong>${escapeHtml(zone.name || zone.id)}</strong>
@@ -844,6 +858,59 @@ function renderZoneAreaInsight(zones, plan) {
       `;
     })
   ].join("");
+  bindZoneAreaCards();
+}
+
+function bindZoneAreaCards() {
+  if (!els.zoneAreaInsight) return;
+  els.zoneAreaInsight.querySelectorAll("[data-zone-id]").forEach((card) => {
+    const zoneId = card.dataset.zoneId || "";
+    card.addEventListener("mouseenter", () => setHoveredAreaZone(zoneId));
+    card.addEventListener("mouseleave", () => setHoveredAreaZone(""));
+    card.addEventListener("focus", () => setHoveredAreaZone(zoneId));
+    card.addEventListener("blur", () => setHoveredAreaZone(""));
+    card.addEventListener("click", () => toggleAreaZoneSelection(zoneId));
+    card.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      toggleAreaZoneSelection(zoneId);
+    });
+  });
+  syncZoneAreaCards();
+}
+
+function toggleAreaZoneSelection(zoneId) {
+  if (!zoneId) return;
+  state.activeAreaZoneId = state.activeAreaZoneId === zoneId ? "" : zoneId;
+  if (viewer) viewer.setActiveAreaZone(state.activeAreaZoneId);
+  syncZoneAreaCards();
+}
+
+function setHoveredAreaZone(zoneId) {
+  state.hoveredAreaZoneId = zoneId || "";
+  if (viewer) viewer.setHoveredAreaZone(state.hoveredAreaZoneId);
+  syncZoneAreaCards();
+}
+
+function clearAreaZoneState() {
+  state.activeAreaZoneId = "";
+  state.hoveredAreaZoneId = "";
+  if (viewer) {
+    viewer.setActiveAreaZone("");
+    viewer.setHoveredAreaZone("");
+  }
+}
+
+function syncZoneAreaCards() {
+  if (!els.zoneAreaInsight) return;
+  els.zoneAreaInsight.querySelectorAll("[data-zone-id]").forEach((card) => {
+    const zoneId = card.dataset.zoneId || "";
+    const selected = zoneId === state.activeAreaZoneId;
+    const hovered = zoneId === state.hoveredAreaZoneId;
+    card.classList.toggle("is-selected", selected);
+    card.classList.toggle("is-hovered", hovered);
+    card.setAttribute("aria-pressed", selected ? "true" : "false");
+  });
 }
 
 function getAreaZonesForLevel(plan, levelId) {
@@ -859,6 +926,9 @@ function zoneAppliesToLevel(zone, levelId) {
 
 function zoneArea(zone) {
   if (Number.isFinite(Number(zone.area))) return Number(zone.area);
+  if (Array.isArray(zone.segments) && zone.segments.length) {
+    return zone.segments.reduce((sum, segment) => sum + zoneArea(segment), 0);
+  }
   if (Array.isArray(zone.points) && zone.points.length >= 3) return polygonArea(zone.points);
   return Number(zone.width || 0) * Number(zone.depth || 0);
 }
@@ -1050,6 +1120,7 @@ function applyAssetModel(assetId) {
   state.model = normalizeModel(cloneModel(sample.model));
   state.scenarioId = state.model.scenarios[0].id;
   state.options.focusLevelActive = false;
+  clearAreaZoneState();
   ensureLabelLevelSelection();
 }
 
@@ -1061,6 +1132,7 @@ async function loadUploadedJson(file) {
     state.sampleId = state.model.id || "uploaded-json";
     state.scenarioId = state.model.scenarios[0].id;
     state.options.focusLevelActive = false;
+    clearAreaZoneState();
     state.uploadState = "loaded-json";
     renderSampleOptions();
     renderScenarioOptions();

@@ -750,19 +750,31 @@ input[type="number"] {
 .zone-basis,
 .zone-empty {
   padding: 9px 10px;
-  border: 1px solid rgba(185, 109, 255, 0.32);
+  border: 1px solid rgba(132, 148, 160, 0.26);
   border-radius: 6px;
-  background: rgba(85, 45, 120, 0.14);
-  color: #ceb5ff;
+  background: rgba(17, 24, 32, 0.64);
+  color: #b9c5cf;
   font-size: 11px;
   line-height: 1.45;
 }
 
 .zone-area-card {
   padding: 10px;
-  border: 1px solid rgba(185, 109, 255, 0.28);
+  border: 1px solid rgba(132, 148, 160, 0.24);
   border-radius: 6px;
-  background: rgba(34, 24, 49, 0.72);
+  background: rgba(18, 25, 32, 0.72);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+}
+
+.zone-area-card:hover,
+.zone-area-card:focus-visible,
+.zone-area-card.is-hovered,
+.zone-area-card.is-selected {
+  border-color: rgba(185, 109, 255, 0.62);
+  background: rgba(48, 30, 70, 0.84);
+  box-shadow: inset 3px 0 0 rgba(185, 109, 255, 0.92);
 }
 
 .zone-area-head {
@@ -776,8 +788,18 @@ input[type="number"] {
   width: 9px;
   height: 9px;
   border-radius: 50%;
+  border: 1px solid #8fa0aa;
+  background: transparent;
+  box-shadow: none;
+}
+
+.zone-area-card:hover .zone-swatch,
+.zone-area-card:focus-visible .zone-swatch,
+.zone-area-card.is-hovered .zone-swatch,
+.zone-area-card.is-selected .zone-swatch {
+  border-color: #d9b9ff;
   background: #b96dff;
-  box-shadow: 0 0 0 3px rgba(185, 109, 255, 0.16);
+  box-shadow: 0 0 0 3px rgba(185, 109, 255, 0.18);
 }
 
 .zone-area-head strong {
@@ -789,17 +811,31 @@ input[type="number"] {
 }
 
 .zone-area-head em {
-  color: #d7c1ff;
+  color: #a8b5bf;
   font-size: 11px;
   font-style: normal;
   font-weight: 800;
 }
 
+.zone-area-card:hover .zone-area-head em,
+.zone-area-card:focus-visible .zone-area-head em,
+.zone-area-card.is-hovered .zone-area-head em,
+.zone-area-card.is-selected .zone-area-head em {
+  color: #dcc8ff;
+}
+
 .zone-area-value {
   margin-top: 7px;
-  color: #f7f1ff;
+  color: #eef4f8;
   font-size: 15px;
   font-weight: 900;
+}
+
+.zone-area-card:hover .zone-area-value,
+.zone-area-card:focus-visible .zone-area-value,
+.zone-area-card.is-hovered .zone-area-value,
+.zone-area-card.is-selected .zone-area-value {
+  color: #fff7ff;
 }
 
 .zone-area-meta {

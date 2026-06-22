@@ -26,10 +26,15 @@ export class ReviewViewer {
     this.hoverTargets = [];
     this.pointer = new THREE.Vector2();
     this.raycaster = new THREE.Raycaster();
+    this.activeAreaZoneId = "";
+    this.hoveredAreaZoneId = "";
     this.hoverTooltip = this.createHoverTooltip();
     this.renderer.domElement.addEventListener("pointermove", (event) => this.handlePointerMove(event));
     this.renderer.domElement.addEventListener("pointerdown", (event) => this.handlePointerMove(event));
-    this.renderer.domElement.addEventListener("pointerleave", () => this.hideHoverTooltip());
+    this.renderer.domElement.addEventListener("pointerleave", () => {
+      this.hideHoverTooltip();
+      this.setHoveredAreaZone("");
+    });
     this.installScene();
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(container);
@@ -68,12 +73,35 @@ export class ReviewViewer {
     this.scene.add(group);
     this.collectHoverTargets();
     this.hideHoverTooltip();
+    this.updateAreaZoneHighlights();
     this.frameModel();
   }
 
   setHoverEnabled(enabled) {
     this.hoverEnabled = Boolean(enabled);
-    if (!this.hoverEnabled) this.hideHoverTooltip();
+    if (!this.hoverEnabled) {
+      this.hideHoverTooltip();
+      this.setHoveredAreaZone("");
+    }
+  }
+
+  setActiveAreaZone(zoneId = "") {
+    const nextId = String(zoneId || "");
+    if (this.activeAreaZoneId === nextId) return;
+    this.activeAreaZoneId = nextId;
+    this.updateAreaZoneHighlights();
+  }
+
+  setHoveredAreaZone(zoneId = "") {
+    const nextId = String(zoneId || "");
+    if (this.hoveredAreaZoneId === nextId) return;
+    this.hoveredAreaZoneId = nextId;
+    this.updateAreaZoneHighlights();
+    this.container.dispatchEvent(
+      new CustomEvent("area-zone-hover", {
+        detail: { zoneId: nextId }
+      })
+    );
   }
 
   frameModel() {
@@ -192,6 +220,7 @@ export class ReviewViewer {
   handlePointerMove(event) {
     if (!this.hoverEnabled || !this.modelRoot || !this.hoverTargets.length) {
       this.hideHoverTooltip();
+      this.setHoveredAreaZone("");
       return;
     }
 
@@ -205,9 +234,11 @@ export class ReviewViewer {
     const hit = this.pickHoverTarget(this.raycaster.intersectObjects(this.hoverTargets, false));
     if (!hit) {
       this.hideHoverTooltip();
+      this.setHoveredAreaZone("");
       return;
     }
 
+    this.setHoveredAreaZone(hit.info.areaZoneId || hit.object?.userData?.areaZoneId || "");
     const containerRect = this.container.getBoundingClientRect();
     this.showHoverTooltip(hit.info, event.clientX - containerRect.left, event.clientY - containerRect.top);
   }
@@ -222,10 +253,32 @@ export class ReviewViewer {
       if (!info) continue;
       const score = Number(info.priority || 0) * 10 - intersection.distance;
       if (!selected || score > selected.score) {
-        selected = { info, score };
+        selected = { object: intersection.object, info, score };
       }
     }
     return selected;
+  }
+
+  updateAreaZoneHighlights() {
+    if (!this.modelRoot) return;
+    this.modelRoot.traverse((object) => {
+      const zoneId = object.userData?.areaZoneId;
+      if (!zoneId || !object.material) return;
+      const active = zoneId === this.activeAreaZoneId || zoneId === this.hoveredAreaZoneId;
+      const part = object.userData.areaZonePart || "fill";
+      const materials = Array.isArray(object.material) ? object.material : [object.material];
+      for (const material of materials) {
+        if (material.color) material.color.set(active ? "#b96dff" : "#9aa6ad");
+        if (material.emissive) {
+          material.emissive.set(active ? "#4e1f7a" : "#000000");
+          material.emissiveIntensity = active ? 0.18 : 0;
+        }
+        material.transparent = true;
+        material.opacity = active ? (part === "outline" ? 0.96 : 0.36) : part === "outline" ? 0.16 : 0.018;
+        if (part !== "outline") material.depthWrite = false;
+        material.needsUpdate = true;
+      }
+    });
   }
 
   showHoverTooltip(info, x, y) {
