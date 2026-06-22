@@ -84,6 +84,16 @@ const materials = {
     opacity: 0.13,
     side: THREE.DoubleSide
   }),
+  areaZone: new THREE.MeshStandardMaterial({
+    color: "#b96dff",
+    emissive: "#4e1f7a",
+    emissiveIntensity: 0.18,
+    transparent: true,
+    opacity: 0.32,
+    roughness: 0.64,
+    side: THREE.DoubleSide,
+    depthWrite: false
+  }),
   dock: new THREE.MeshStandardMaterial({ color: "#36404b", roughness: 0.8 }),
   rack: new THREE.MeshStandardMaterial({ color: "#d49a4b", roughness: 0.65 }),
   cutPlane: new THREE.MeshStandardMaterial({
@@ -98,6 +108,7 @@ const edgeMaterials = {
   service: new THREE.LineBasicMaterial({ color: "#dffff6", transparent: true, opacity: 0.96 }),
   core: new THREE.LineBasicMaterial({ color: "#e5a85f", transparent: true, opacity: 0.86 }),
   beam: new THREE.LineBasicMaterial({ color: "#d5e4ef", transparent: true, opacity: 0.86 }),
+  areaZone: new THREE.LineBasicMaterial({ color: "#e2c2ff", transparent: true, opacity: 0.95 }),
   dimension: new THREE.LineBasicMaterial({ color: "#f4d074", transparent: true, opacity: 0.9 })
 };
 
@@ -192,6 +203,7 @@ function addLevel(root, plan, level, depth, zOffset, options) {
 
   addPerimeter(root, plan, level, depth, zOffset, options.section);
   addPlanFeatures(root, plan, level, zOffset);
+  addAreaZones(root, plan, level, zOffset, options);
 
   if (options.showCeilings) {
     addHeightVolume(root, plan, level, depth, zOffset);
@@ -985,6 +997,126 @@ function addPlanFeatures(root, plan, level, zOffset) {
       ], feature.material === "dock" ? "#d49a4b" : "#e5a85f", 3)
     );
   }
+}
+
+function addAreaZones(root, plan, level, zOffset, options = {}) {
+  if (!Array.isArray(plan.areaZones) || !plan.areaZones.length) return;
+  const zones = plan.areaZones.filter((zone) => areaZoneAppliesToLevel(zone, level.sourceLevelId));
+  if (!zones.length) return;
+  const y = level.y + (level.slabDepth || 0.12) + 0.052;
+  const shouldLabel = options.planView || options.focusLevelActive;
+
+  for (const zone of zones) {
+    const area = areaZoneArea(zone);
+    if (!area) continue;
+    const hoverInfo = createAreaZoneHoverInfo(plan, zone, area, level);
+    let center = [Number(zone.x || 0), Number(zone.z || 0) + zOffset];
+    let mesh = null;
+
+    if (Array.isArray(zone.points) && zone.points.length >= 3) {
+      const outline = zone.points.map(([x, z]) => [x, z + zOffset]);
+      center = polygonCentroid(outline);
+      mesh = addShapePlane(root, outline, y, materials.areaZone, "area-zone", hoverInfo);
+      addAreaZoneOutline(root, outline, y + 0.018);
+    } else {
+      const width = Number(zone.width || 0);
+      const depth = Number(zone.depth || 0);
+      if (width <= 0 || depth <= 0) continue;
+      const x = Number(zone.x || 0);
+      const z = Number(zone.z || 0) + zOffset;
+      mesh = addBox(root, width, 0.035, depth, x, y, z, materials.areaZone, "area-zone", hoverInfo);
+      mesh.castShadow = false;
+      mesh.renderOrder = 4;
+      addAreaZoneRectOutline(root, x, z, width, depth, y + 0.028);
+    }
+
+    if (mesh) {
+      mesh.receiveShadow = false;
+      mesh.renderOrder = 4;
+    }
+    if (shouldLabel) {
+      addLabelSprite(root, [zone.name || "구획", formatArea(area)], [center[0], y + 0.32, center[1]], {
+        accent: "#b96dff",
+        width: 6.6,
+        height: 1.85
+      });
+    }
+  }
+}
+
+function areaZoneAppliesToLevel(zone, levelId) {
+  if (!Array.isArray(zone.levelIds) || !zone.levelIds.length) return true;
+  return zone.levelIds.includes(levelId);
+}
+
+function createAreaZoneHoverInfo(plan, zone, area, level) {
+  const footprint = planFloorArea(plan);
+  const ratio = footprint ? (area / footprint) * 100 : 0;
+  return createGenericHoverInfo(
+    `${zone.name || "구획"} · ${hoverLevelName(level)}`,
+    [
+      { label: "산정 면적", value: formatArea(area) },
+      { label: "구획 유형", value: areaZoneTypeLabel(zone.type) },
+      { label: "평면 대비", value: `${formatNumber(ratio)}%` },
+      { label: "산정 근거", value: zone.sourceNote || plan.areaBasisNote || "도면 치수 기반" }
+    ],
+    "#b96dff",
+    7
+  );
+}
+
+function areaZoneArea(zone) {
+  if (Number.isFinite(Number(zone.area))) return Number(zone.area);
+  if (Array.isArray(zone.points) && zone.points.length >= 3) return polygonArea(zone.points);
+  return Number(zone.width || 0) * Number(zone.depth || 0);
+}
+
+function areaZoneTypeLabel(type) {
+  return (
+    {
+      warehouse: "창고",
+      ramp: "램프",
+      core: "코어",
+      restroom: "화장실",
+      elevator: "엘리베이터",
+      stair: "계단실",
+      common: "공용부",
+      dock: "도크",
+      office: "전용부"
+    }[type] || "구획"
+  );
+}
+
+function addAreaZoneRectOutline(root, x, z, width, depth, y) {
+  const halfW = width / 2;
+  const halfD = depth / 2;
+  addAreaZoneOutline(
+    root,
+    [
+      [x - halfW, z - halfD],
+      [x + halfW, z - halfD],
+      [x + halfW, z + halfD],
+      [x - halfW, z + halfD]
+    ],
+    y
+  );
+}
+
+function addAreaZoneOutline(root, outline, y) {
+  const points = outline.map(([x, z]) => new THREE.Vector3(x, y, z));
+  const geometry = new THREE.BufferGeometry().setFromPoints(points);
+  const line = new THREE.LineLoop(geometry, edgeMaterials.areaZone);
+  line.name = "area-zone-outline";
+  line.renderOrder = 5;
+  root.add(line);
+}
+
+function polygonCentroid(points) {
+  if (!points.length) return [0, 0];
+  return points.reduce(
+    (acc, point) => [acc[0] + point[0] / points.length, acc[1] + point[1] / points.length],
+    [0, 0]
+  );
 }
 
 function addRoof(root, plan, totalHeight, depth, zOffset) {

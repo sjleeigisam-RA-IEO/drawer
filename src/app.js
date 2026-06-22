@@ -1,5 +1,5 @@
-import { samples } from "./samples.js?v=im-preview-1";
-import { assetLibrary } from "./asset-library.js?v=im-preview-1";
+import { samples } from "./samples.js?v=area-zones-1";
+import { assetLibrary } from "./asset-library.js?v=area-zones-1";
 import {
   cloneModel,
   duplicateScenario,
@@ -10,15 +10,15 @@ import {
   normalizeModel,
   setScenarioLevelValue,
   summarizeModel
-} from "./schema.js?v=im-preview-1";
+} from "./schema.js?v=area-zones-1";
 import {
   createDrawingReview,
   markReviewPublished,
   normalizeVectorPackage,
   reviewStatusLabel
-} from "./drawing-schema.js?v=im-preview-1";
-import { createReviewModel } from "./modeler.js?v=im-preview-1";
-import { ReviewViewer } from "./viewer.js?v=im-preview-1";
+} from "./drawing-schema.js?v=area-zones-1";
+import { createReviewModel } from "./modeler.js?v=area-zones-1";
+import { ReviewViewer } from "./viewer.js?v=area-zones-1";
 
 const APP_BOOT_ID = Date.now().toString(36);
 const APP_BASE_URL = new URL("../", import.meta.url);
@@ -89,6 +89,7 @@ const els = {
   metrics: document.querySelector("#metrics"),
   summary: document.querySelector("#summary"),
   levelInsight: document.querySelector("#levelInsight"),
+  zoneAreaInsight: document.querySelector("#zoneAreaInsight"),
   buildingInsight: document.querySelector("#buildingInsight"),
   drawingInsight: document.querySelector("#drawingInsight"),
   modelViewToolbar: document.querySelector("#modelViewToolbar"),
@@ -774,6 +775,8 @@ function renderInsightPanels(activeSummary) {
   const source = state.model.source || {};
   const asset = getActiveAsset();
   const vectorPackage = drawingState.vectorPackage;
+  const selectedSourceLevelId = selectedLevel?.id || String(state.options.labelLevelId || "").split(":")[0];
+  const selectedZones = getAreaZonesForLevel(plan, selectedSourceLevelId);
   const selectedLevelName =
     els.labelLevelSelect.selectedOptions?.[0]?.textContent || selectedLevel?.name || "-";
 
@@ -788,6 +791,8 @@ function renderInsightPanels(activeSummary) {
     ["천정속", formatMeters(selectedLevel?.ceilingVoid)],
     ["보 깊이", formatMeters(selectedLevel?.beamDepth)]
   ]);
+
+  renderZoneAreaInsight(selectedZones, plan);
 
   els.buildingInsight.innerHTML = renderDefinitionRows([
     ["전체 층수", `${formatInteger(activeSummary.levelCount)}개 층`],
@@ -811,6 +816,71 @@ function renderInsightPanels(activeSummary) {
     ["캘리브레이션", drawingState.review?.calibration?.scaleLabel || "검토 필요"],
     ["모델 상태", reviewStatusLabel(asset?.modelReview?.status)]
   ]);
+}
+
+function renderZoneAreaInsight(zones, plan) {
+  if (!els.zoneAreaInsight) return;
+  if (!zones.length) {
+    els.zoneAreaInsight.innerHTML = `<div class="zone-empty">선택 층에 등록된 구획 산정값이 없습니다.</div>`;
+    return;
+  }
+  const basis = plan.areaBasisNote || "도면 외곽/코어/그리드 치수 기반";
+  els.zoneAreaInsight.innerHTML = [
+    `<div class="zone-basis">${escapeHtml(basis)}</div>`,
+    ...zones.map((zone) => {
+      const area = zoneArea(zone);
+      const footprint = planFloorArea(plan);
+      const ratio = footprint ? (area / footprint) * 100 : 0;
+      return `
+        <div class="zone-area-card">
+          <div class="zone-area-head">
+            <span class="zone-swatch"></span>
+            <strong>${escapeHtml(zone.name || zone.id)}</strong>
+            <em>${escapeHtml(zoneTypeLabel(zone.type))}</em>
+          </div>
+          <div class="zone-area-value">${formatArea(area)}</div>
+          <div class="zone-area-meta">전체 평면 대비 ${formatNumber(ratio)}% · ${escapeHtml(zoneSourceLabel(zone))}</div>
+        </div>
+      `;
+    })
+  ].join("");
+}
+
+function getAreaZonesForLevel(plan, levelId) {
+  return (plan.areaZones || [])
+    .filter((zone) => zoneAppliesToLevel(zone, levelId))
+    .filter((zone) => zoneArea(zone) > 0);
+}
+
+function zoneAppliesToLevel(zone, levelId) {
+  if (!Array.isArray(zone.levelIds) || !zone.levelIds.length) return true;
+  return zone.levelIds.includes(levelId);
+}
+
+function zoneArea(zone) {
+  if (Number.isFinite(Number(zone.area))) return Number(zone.area);
+  if (Array.isArray(zone.points) && zone.points.length >= 3) return polygonArea(zone.points);
+  return Number(zone.width || 0) * Number(zone.depth || 0);
+}
+
+function zoneSourceLabel(zone) {
+  return zone.sourceNote || "도면 치수 기반";
+}
+
+function zoneTypeLabel(type) {
+  return (
+    {
+      warehouse: "창고",
+      ramp: "램프",
+      core: "코어",
+      restroom: "화장실",
+      elevator: "EV",
+      stair: "계단실",
+      common: "공용부",
+      dock: "도크",
+      office: "전용부"
+    }[type] || "구획"
+  );
 }
 
 function getSelectedLevelSnapshot() {
@@ -838,8 +908,17 @@ function activeUseFallback() {
 function renderDefinitionRows(rows) {
   return rows
     .filter(Boolean)
-    .map(([label, value]) => `<div><dt>${label}</dt><dd>${value ?? "-"}</dd></div>`)
+    .map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value ?? "-")}</dd></div>`)
     .join("");
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 function averageSpacingLabel(values = []) {

@@ -220,6 +220,75 @@ export const samples = [
             depth: 13.8
           }
         ],
+        areaBasisNote: "PDF 평면도에서 샘플링한 외곽 치수, 코어 위치, visible dimension 기반 검토용 산정",
+        areaZones: [
+          {
+            id: "daechi-office-net",
+            name: "업무 전용 추정구역",
+            type: "office",
+            levelIds: ["secondFloor", "officeTypical"],
+            x: 3.1,
+            z: 2.4,
+            width: 22.8,
+            depth: 27.6,
+            sourceNote: "외곽 치수-코어 배치 기반"
+          },
+          {
+            id: "daechi-core-common",
+            name: "코어/공용부",
+            type: "core",
+            levelIds: ["lobby", "secondFloor", "officeTypical"],
+            x: -5.6,
+            z: -1.5,
+            width: 10.8,
+            depth: 15.6,
+            sourceNote: "코어 외곽 치수 기반"
+          },
+          {
+            id: "daechi-elevator-bank",
+            name: "엘리베이터 홀",
+            type: "elevator",
+            levelIds: ["lobby", "secondFloor", "officeTypical"],
+            x: -8.3,
+            z: -5.8,
+            width: 4.5,
+            depth: 5.4,
+            sourceNote: "코어 내 EV 뱅크 가정"
+          },
+          {
+            id: "daechi-stair-core",
+            name: "계단실",
+            type: "stair",
+            levelIds: ["lobby", "secondFloor", "officeTypical"],
+            x: -2.2,
+            z: 4.4,
+            width: 4.1,
+            depth: 5.8,
+            sourceNote: "코어 내 피난계단 가정"
+          },
+          {
+            id: "daechi-restroom",
+            name: "화장실",
+            type: "restroom",
+            levelIds: ["lobby", "secondFloor", "officeTypical"],
+            x: -8.3,
+            z: 5.2,
+            width: 3.8,
+            depth: 4.6,
+            sourceNote: "코어 내 위생공간 가정"
+          },
+          {
+            id: "daechi-lobby-driveway",
+            name: "1F 차량/진입 구역",
+            type: "ramp",
+            levelIds: ["lobby"],
+            x: 2.8,
+            z: -15.8,
+            width: 23.5,
+            depth: 1.4,
+            sourceNote: "도면상 남측 띠 치수 기반"
+          }
+        ],
         gridX: [-15.6, -8.1, 0, 8.1, 15.6],
         gridZ: [-17.95, -8.9, 0, 8.9, 17.95],
         core: { x: -5.6, z: -1.5, width: 10.8, depth: 15.6, elevators: 3, stairs: 2, risers: 3 },
@@ -355,6 +424,108 @@ export const samples = [
             width: 198,
             height: 0.16,
             depth: 3.5
+          }
+        ],
+        areaBasisNote: "준공 PDF 평면도에서 샘플링한 외곽 229.3m x 92m, 코어, 도크, 램프 치수 기반 검토용 산정",
+        areaZones: [
+          {
+            id: "gangnam-west-warehouse",
+            name: "서측 창고영역",
+            type: "warehouse",
+            levelIds: ["b1", "warehouse1", "warehouseUpper"],
+            x: -57,
+            z: 1,
+            width: 88,
+            depth: 72,
+            sourceNote: "외곽/램프 분리선 기반"
+          },
+          {
+            id: "gangnam-east-warehouse",
+            name: "동측 창고영역",
+            type: "warehouse",
+            levelIds: ["b1", "warehouse1", "warehouseUpper"],
+            x: 53,
+            z: 1,
+            width: 98,
+            depth: 72,
+            sourceNote: "외곽/램프 분리선 기반"
+          },
+          {
+            id: "gangnam-central-ramp",
+            name: "중앙 램프/차로",
+            type: "ramp",
+            levelIds: ["warehouse1", "warehouseUpper"],
+            x: -3,
+            z: 0,
+            width: 18,
+            depth: 82,
+            sourceNote: "동서 창고 분리 램프 가정"
+          },
+          {
+            id: "gangnam-dock-apron-zone",
+            name: "도크 어프로치",
+            type: "dock",
+            levelIds: ["warehouse1"],
+            x: 0,
+            z: 44,
+            width: 198,
+            depth: 3.5,
+            sourceNote: "도크 띠 치수 기반"
+          },
+          {
+            id: "gangnam-core-common",
+            name: "사무/공용 코어",
+            type: "core",
+            levelIds: ["warehouse1", "warehouseUpper"],
+            x: -84,
+            z: -23,
+            width: 20,
+            depth: 16,
+            sourceNote: "코어 외곽 치수 기반"
+          },
+          {
+            id: "gangnam-elevator-bank",
+            name: "엘리베이터",
+            type: "elevator",
+            levelIds: ["warehouse1", "warehouseUpper"],
+            x: -89,
+            z: -27,
+            width: 5.6,
+            depth: 5.8,
+            sourceNote: "코어 내 EV 뱅크 가정"
+          },
+          {
+            id: "gangnam-restroom",
+            name: "화장실",
+            type: "restroom",
+            levelIds: ["warehouse1", "warehouseUpper"],
+            x: -78,
+            z: -18,
+            width: 5.8,
+            depth: 5.4,
+            sourceNote: "코어 내 위생공간 가정"
+          },
+          {
+            id: "gangnam-stair-west",
+            name: "서측 계단실",
+            type: "stair",
+            levelIds: ["warehouse1", "warehouseUpper"],
+            x: -93,
+            z: -18,
+            width: 4.8,
+            depth: 6.2,
+            sourceNote: "코어 내 계단실 가정"
+          },
+          {
+            id: "gangnam-common-corridor",
+            name: "공용 복도",
+            type: "common",
+            levelIds: ["warehouse1", "warehouseUpper"],
+            x: -84,
+            z: -23,
+            width: 16.2,
+            depth: 2.4,
+            sourceNote: "코어 연결 복도 가정"
           }
         ],
         gridX: [-103, -82.4, -61.8, -41.2, -20.6, 0, 20.6, 41.2, 61.8, 82.4, 103],
@@ -503,6 +674,108 @@ export const samples = [
             width: 160,
             height: 0.16,
             depth: 3.3
+          }
+        ],
+        areaBasisNote: "준공 PDF 평면도에서 샘플링한 외곽 188m x 84m, 코어, 도크, 램프 치수 기반 검토용 산정",
+        areaZones: [
+          {
+            id: "dongsan-west-warehouse",
+            name: "서측 창고영역",
+            type: "warehouse",
+            levelIds: ["b1", "warehouse1", "warehouseUpper"],
+            x: -48,
+            z: 1,
+            width: 70,
+            depth: 66,
+            sourceNote: "외곽/램프 분리선 기반"
+          },
+          {
+            id: "dongsan-east-warehouse",
+            name: "동측 창고영역",
+            type: "warehouse",
+            levelIds: ["b1", "warehouse1", "warehouseUpper"],
+            x: 41,
+            z: 1,
+            width: 78,
+            depth: 66,
+            sourceNote: "외곽/램프 분리선 기반"
+          },
+          {
+            id: "dongsan-central-ramp",
+            name: "중앙 램프/차로",
+            type: "ramp",
+            levelIds: ["warehouse1", "warehouseUpper"],
+            x: -4,
+            z: 0,
+            width: 16,
+            depth: 74,
+            sourceNote: "동서 창고 분리 램프 가정"
+          },
+          {
+            id: "dongsan-dock-apron-zone",
+            name: "도크 어프로치",
+            type: "dock",
+            levelIds: ["warehouse1"],
+            x: 0,
+            z: 40,
+            width: 160,
+            depth: 3.3,
+            sourceNote: "도크 띠 치수 기반"
+          },
+          {
+            id: "dongsan-core-common",
+            name: "사무/공용 코어",
+            type: "core",
+            levelIds: ["warehouse1", "warehouseUpper"],
+            x: -68,
+            z: -18,
+            width: 18,
+            depth: 15,
+            sourceNote: "코어 외곽 치수 기반"
+          },
+          {
+            id: "dongsan-elevator-bank",
+            name: "엘리베이터",
+            type: "elevator",
+            levelIds: ["warehouse1", "warehouseUpper"],
+            x: -72,
+            z: -22,
+            width: 5.2,
+            depth: 5.4,
+            sourceNote: "코어 내 EV 뱅크 가정"
+          },
+          {
+            id: "dongsan-restroom",
+            name: "화장실",
+            type: "restroom",
+            levelIds: ["warehouse1", "warehouseUpper"],
+            x: -63,
+            z: -14,
+            width: 5.2,
+            depth: 5.1,
+            sourceNote: "코어 내 위생공간 가정"
+          },
+          {
+            id: "dongsan-stair-core",
+            name: "계단실",
+            type: "stair",
+            levelIds: ["warehouse1", "warehouseUpper"],
+            x: -77,
+            z: -13,
+            width: 4.4,
+            depth: 5.8,
+            sourceNote: "코어 내 계단실 가정"
+          },
+          {
+            id: "dongsan-common-corridor",
+            name: "공용 복도",
+            type: "common",
+            levelIds: ["warehouse1", "warehouseUpper"],
+            x: -68,
+            z: -18,
+            width: 14.4,
+            depth: 2.2,
+            sourceNote: "코어 연결 복도 가정"
           }
         ],
         gridX: [-84, -63, -42, -21, 0, 21, 42, 63, 84],

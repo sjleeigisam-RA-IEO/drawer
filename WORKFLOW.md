@@ -61,6 +61,19 @@ The current 3D model is parametric and approximate. It should capture review-cri
 - finished ceiling height
 - logistics clear height, dock height, rack/dock hints where relevant
 
+For zone-area review, add `plan.areaBasisNote` and `plan.areaZones[]` in `src/samples.js`.
+Use model-meter coordinates from the reviewed drawing dimensions:
+
+- rectangle zones: `x`, `z`, `width`, `depth`
+- polygon zones: `points: [[x, z], ...]`
+- optional verified area override: `area`
+- applicable floors: `levelIds`
+- review note: `sourceNote`
+
+Use this for ramp area, east/west or north/south warehouse area, dock apron,
+core, elevator, restroom, stair, and common-corridor estimates. The viewer will
+calculate `㎡ / 평` and show purple overlays from the same records.
+
 Do not present generated 3D geometry as certified BIM. The source of truth is the validated drawing package plus the model JSON.
 
 ## Future Admin Upload Path

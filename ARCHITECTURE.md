@@ -96,6 +96,20 @@ type Space = {
   provenance: Array<{ primitiveId?: string; manual?: boolean }>;
 };
 
+type AreaZone = {
+  id: string;
+  name: string;
+  type: "warehouse" | "ramp" | "core" | "restroom" | "elevator" | "stair" | "common" | "dock" | "office";
+  levelIds?: string[];
+  x?: number;
+  z?: number;
+  width?: number;
+  depth?: number;
+  points?: Array<[number, number]>;
+  area?: number;
+  sourceNote?: string;
+};
+
 type HeightRule = {
   id: string;
   scope: "project" | "floor" | "use" | "zone" | "space";
@@ -166,6 +180,14 @@ Core geometry is currently procedural review geometry. The modeler resolves
 core corridor, and MEP risers. If a drawing-derived exact core layout is needed
 later, add optional `plan.core.components[]` records with core-local coordinates
 and keep the procedural layout as the fallback.
+
+Zone area analysis is stored as `plan.areaZones[]`. Each zone is a drawing-dimension
+review layer in model meters, either a rectangle (`x`, `z`, `width`, `depth`) or a
+polygon (`points`). The app calculates `㎡ / 평`, shows the basis note in the
+left review panel, and renders the same zones as purple overlays in the 3D/plan
+viewer. These values are not certified GFA/NLA/rentable areas; overlapping core
+sub-zones such as elevator, restroom, stair, and common corridor are allowed for
+visual review and should not be blindly summed.
 
 ## Asset Mapping
 
