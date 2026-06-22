@@ -11,6 +11,26 @@ The app is static. A deploy target only needs to serve:
 
 No server process is required after the SVG packages are generated.
 
+## GitHub Pages
+
+This repo can be published directly from the `main` branch root.
+
+Expected project-site URL:
+
+```text
+https://sjleeigisam-ra-ieo.github.io/drawer/
+```
+
+Useful deployed URLs:
+
+```text
+https://sjleeigisam-ra-ieo.github.io/drawer/?mode=library&assetId=asset-daechi2-pdf&stage=model
+https://sjleeigisam-ra-ieo.github.io/drawer/?mode=library&assetId=asset-hobup-gangnam&stage=drawing
+https://sjleeigisam-ra-ieo.github.io/drawer/?embedded=1&mode=library&assetId=asset-hobup-dongsan&stage=model
+```
+
+The repository includes `.nojekyll` so GitHub Pages serves the static files without Jekyll processing.
+
 ## External Runtime Dependencies
 
 The HTML import map currently loads these browser libraries from `unpkg.com`:
