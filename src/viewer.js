@@ -157,6 +157,20 @@ export class ReviewViewer {
     link.click();
   }
 
+  capturePngBlob() {
+    this.controls.update();
+    this.renderer.render(this.scene, this.camera);
+    return new Promise((resolve, reject) => {
+      this.renderer.domElement.toBlob((blob) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error("PNG 캡처를 생성하지 못했습니다."));
+        }
+      }, "image/png");
+    });
+  }
+
   createHoverTooltip() {
     const tooltip = document.createElement("div");
     tooltip.className = "model-hover-tooltip is-hidden";

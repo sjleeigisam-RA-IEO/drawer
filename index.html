@@ -32,17 +32,6 @@
           <p class="eyebrow">RA asset review</p>
           <h1>Parametric 3D Reviewer</h1>
         </div>
-        <div class="toolbar" aria-label="viewer commands">
-          <button class="icon-button" id="resetCamera" type="button" title="카메라 초기화">
-            <i data-lucide="rotate-ccw"></i>
-          </button>
-          <button class="icon-button" id="snapshot" type="button" title="IM 이미지 저장">
-            <i data-lucide="image-down"></i>
-          </button>
-          <button class="icon-button" id="exportJson" type="button" title="모델 JSON 저장">
-            <i data-lucide="braces"></i>
-          </button>
-        </div>
       </header>
 
       <main class="workspace">
@@ -123,14 +112,23 @@
 
           <section class="panel-section">
             <div class="section-heading">
-              <h2>IM 출력</h2>
+              <h2>선택 층 핵심</h2>
             </div>
-            <div class="shot-grid" id="shotGrid">
-              <button class="shot-button" data-shot="perspective" type="button">투시</button>
-              <button class="shot-button" data-shot="elevation" type="button">입면</button>
-              <button class="shot-button" data-shot="section" type="button">단면</button>
-              <button class="shot-button" data-shot="top" type="button">평면</button>
+            <dl class="metric-list insight-list" id="levelInsight"></dl>
+          </section>
+
+          <section class="panel-section">
+            <div class="section-heading">
+              <h2>구조/코어</h2>
             </div>
+            <dl class="metric-list insight-list" id="buildingInsight"></dl>
+          </section>
+
+          <section class="panel-section">
+            <div class="section-heading">
+              <h2>도면 근거</h2>
+            </div>
+            <dl class="metric-list insight-list" id="drawingInsight"></dl>
           </section>
 
           <section class="panel-section" hidden>
@@ -172,6 +170,41 @@
               <i data-lucide="box"></i>
               2. 3D 모델
             </button>
+          </div>
+
+          <div id="modelViewToolbar" class="model-view-toolbar is-hidden" hidden>
+            <div class="shot-grid" id="shotGrid" aria-label="3D 보기 선택">
+              <button class="shot-button is-active" data-shot="perspective" type="button">
+                <i data-lucide="box"></i>
+                투시
+              </button>
+              <button class="shot-button" data-shot="elevation" type="button">
+                <i data-lucide="building-2"></i>
+                입면
+              </button>
+              <button class="shot-button" data-shot="section" type="button">
+                <i data-lucide="panel-top"></i>
+                단면
+              </button>
+              <button class="shot-button" data-shot="top" type="button">
+                <i data-lucide="map"></i>
+                평면
+              </button>
+            </div>
+            <div class="viewer-tool-actions" aria-label="3D 모델 출력">
+              <button class="text-button" id="resetCamera" type="button">
+                <i data-lucide="rotate-ccw"></i>
+                초기화
+              </button>
+              <button class="text-button" id="snapshot" type="button">
+                <i data-lucide="image"></i>
+                IM 미리보기
+              </button>
+              <button class="text-button" id="exportJson" type="button">
+                <i data-lucide="braces"></i>
+                JSON
+              </button>
+            </div>
           </div>
 
           <div id="drawingStage" class="drawing-stage">
@@ -218,6 +251,32 @@
           <div class="metrics-band" id="metrics"></div>
         </section>
       </main>
+    </div>
+
+    <div id="snapshotPreview" class="snapshot-preview is-hidden" hidden role="dialog" aria-modal="true" aria-labelledby="snapshotPreviewTitle">
+      <div class="snapshot-backdrop" data-preview-close></div>
+      <div class="snapshot-dialog">
+        <div class="snapshot-dialog-header">
+          <div>
+            <p class="eyebrow">IM output</p>
+            <h2 id="snapshotPreviewTitle">IM 이미지 미리보기</h2>
+            <p id="snapshotPreviewMeta" class="snapshot-meta"></p>
+          </div>
+          <button class="icon-button small" id="snapshotPreviewClose" type="button" title="미리보기 닫기">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="snapshot-image-wrap">
+          <img id="snapshotPreviewImage" alt="IM output preview" />
+        </div>
+        <div class="snapshot-dialog-actions">
+          <button class="text-button neutral" id="snapshotPreviewDismiss" type="button">닫기</button>
+          <button class="text-button" id="snapshotPreviewDownload" type="button">
+            <i data-lucide="download"></i>
+            PNG 저장
+          </button>
+        </div>
+      </div>
     </div>
 
     <script>

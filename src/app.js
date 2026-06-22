@@ -1,5 +1,5 @@
-import { samples } from "./samples.js?v=number-format-1";
-import { assetLibrary } from "./asset-library.js?v=number-format-1";
+import { samples } from "./samples.js?v=im-preview-1";
+import { assetLibrary } from "./asset-library.js?v=im-preview-1";
 import {
   cloneModel,
   duplicateScenario,
@@ -10,15 +10,15 @@ import {
   normalizeModel,
   setScenarioLevelValue,
   summarizeModel
-} from "./schema.js?v=number-format-1";
+} from "./schema.js?v=im-preview-1";
 import {
   createDrawingReview,
   markReviewPublished,
   normalizeVectorPackage,
   reviewStatusLabel
-} from "./drawing-schema.js?v=number-format-1";
-import { createReviewModel } from "./modeler.js?v=number-format-1";
-import { ReviewViewer } from "./viewer.js?v=number-format-1";
+} from "./drawing-schema.js?v=im-preview-1";
+import { createReviewModel } from "./modeler.js?v=im-preview-1";
+import { ReviewViewer } from "./viewer.js?v=im-preview-1";
 
 const APP_BOOT_ID = Date.now().toString(36);
 const APP_BASE_URL = new URL("../", import.meta.url);
@@ -88,9 +88,19 @@ const els = {
   levelTable: document.querySelector("#levelTable"),
   metrics: document.querySelector("#metrics"),
   summary: document.querySelector("#summary"),
+  levelInsight: document.querySelector("#levelInsight"),
+  buildingInsight: document.querySelector("#buildingInsight"),
+  drawingInsight: document.querySelector("#drawingInsight"),
+  modelViewToolbar: document.querySelector("#modelViewToolbar"),
   resetCamera: document.querySelector("#resetCamera"),
   snapshot: document.querySelector("#snapshot"),
   exportJson: document.querySelector("#exportJson"),
+  snapshotPreview: document.querySelector("#snapshotPreview"),
+  snapshotPreviewImage: document.querySelector("#snapshotPreviewImage"),
+  snapshotPreviewMeta: document.querySelector("#snapshotPreviewMeta"),
+  snapshotPreviewClose: document.querySelector("#snapshotPreviewClose"),
+  snapshotPreviewDismiss: document.querySelector("#snapshotPreviewDismiss"),
+  snapshotPreviewDownload: document.querySelector("#snapshotPreviewDownload"),
   addScenario: document.querySelector("#addScenario"),
   toggleStructure: document.querySelector("#toggleStructure"),
   toggleCeilings: document.querySelector("#toggleCeilings"),
@@ -102,6 +112,11 @@ const els = {
 };
 
 let viewer = null;
+const snapshotPreviewState = {
+  objectUrl: "",
+  filename: ""
+};
+
 const drawingState = {
   stage: "drawing",
   vectorPackage: null,
@@ -262,10 +277,17 @@ function bindEvents() {
       updateScene();
     }
   });
-  els.snapshot.addEventListener("click", () => {
-    if (drawingState.stage === "model") getViewer().snapshot(snapshotName("perspective"));
-  });
+  els.snapshot.addEventListener("click", () => openSnapshotPreview());
   els.exportJson.addEventListener("click", exportCurrentModel);
+  els.snapshotPreviewClose.addEventListener("click", closeSnapshotPreview);
+  els.snapshotPreviewDismiss.addEventListener("click", closeSnapshotPreview);
+  els.snapshotPreviewDownload.addEventListener("click", downloadSnapshotPreview);
+  els.snapshotPreview.addEventListener("click", (event) => {
+    if (event.target.closest("[data-preview-close]")) closeSnapshotPreview();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !els.snapshotPreview.hidden) closeSnapshotPreview();
+  });
 
   els.addScenario.addEventListener("click", () => {
     const scenario = duplicateScenario(state.model, state.scenarioId);
@@ -279,38 +301,47 @@ function bindEvents() {
     const button = event.target.closest("[data-shot]");
     if (!button) return;
     if (drawingState.stage !== "model") return;
-    const shot = button.dataset.shot;
-    state.activeShot = shot;
-    if (shot === "section") {
-      state.options.planView = false;
-      state.options.section = true;
-      state.options.showStructure = true;
-      state.options.showCeilings = true;
-      state.options.showServices = true;
-      els.toggleStructure.checked = true;
-      els.toggleCeilings.checked = true;
-      els.toggleServices.checked = true;
-      els.toggleSection.checked = true;
-      updateScene();
-    } else if (shot === "top") {
-      state.options.planView = true;
-      state.options.section = false;
-      els.toggleSection.checked = false;
-      updateScene();
-    } else if (shot === "elevation") {
-      state.options.planView = false;
-      state.options.section = false;
-      els.toggleSection.checked = false;
-      updateScene();
-    } else {
-      state.options.planView = false;
-      state.options.section = false;
-      els.toggleSection.checked = false;
-      updateScene();
-    }
-    getViewer().setCameraPreset(shot);
-    if (state.options.focusLevelActive) focusSelectedLevel();
-    window.setTimeout(() => getViewer().snapshot(snapshotName(shot)), 80);
+    activateShot(button.dataset.shot);
+  });
+}
+
+function activateShot(shot) {
+  if (!["perspective", "elevation", "section", "top"].includes(shot)) return;
+  state.activeShot = shot;
+  applyShotOptions(shot);
+  syncShotButtons();
+  updateScene();
+  getViewer().setCameraPreset(shot);
+  if (state.options.focusLevelActive) focusSelectedLevel();
+}
+
+function applyShotOptions(shot) {
+  if (shot === "section") {
+    state.options.planView = false;
+    state.options.section = true;
+    state.options.showStructure = true;
+    state.options.showCeilings = true;
+    state.options.showServices = true;
+    els.toggleStructure.checked = true;
+    els.toggleCeilings.checked = true;
+    els.toggleServices.checked = true;
+    els.toggleSection.checked = true;
+    return;
+  }
+  if (shot === "top") {
+    state.options.planView = true;
+    state.options.section = false;
+    els.toggleSection.checked = false;
+    return;
+  }
+  state.options.planView = false;
+  state.options.section = false;
+  els.toggleSection.checked = false;
+}
+
+function syncShotButtons() {
+  els.shotGrid.querySelectorAll("[data-shot]").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.shot === state.activeShot);
   });
 }
 
@@ -422,8 +453,11 @@ function syncStage() {
   const drawingActive = drawingState.stage === "drawing";
   els.drawingStage.classList.toggle("is-hidden", !drawingActive);
   els.viewer.classList.toggle("is-hidden", drawingActive);
+  els.modelViewToolbar.classList.toggle("is-hidden", drawingActive);
   els.drawingStage.hidden = !drawingActive;
   els.viewer.hidden = drawingActive;
+  els.modelViewToolbar.hidden = drawingActive;
+  syncShotButtons();
   if (!drawingActive) {
     updateScene({ focusLevel: state.options.focusLevelActive });
     getViewer().resize();
@@ -729,6 +763,154 @@ function renderMetrics() {
   ]
     .map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`)
     .join("");
+
+  renderInsightPanels(active);
+}
+
+function renderInsightPanels(activeSummary) {
+  const selectedLevel = getSelectedLevelSnapshot();
+  const plan = state.model.plan || {};
+  const core = plan.core || null;
+  const source = state.model.source || {};
+  const asset = getActiveAsset();
+  const vectorPackage = drawingState.vectorPackage;
+  const selectedLevelName =
+    els.labelLevelSelect.selectedOptions?.[0]?.textContent || selectedLevel?.name || "-";
+
+  els.levelInsight.innerHTML = renderDefinitionRows([
+    ["선택 층", selectedLevelName],
+    ["용도", useLabel(selectedLevel?.use)],
+    ["반복", `${formatInteger(selectedLevel?.count || 1)}개 층`],
+    ["1개층 면적", formatArea(planFloorArea(plan))],
+    ["층고", formatMeters(selectedLevel?.floorToFloorHeight)],
+    ["천정고", selectedLevel?.finishedCeilingHeight ? formatMeters(selectedLevel.finishedCeilingHeight) : "오픈 천장"],
+    ["유효고", formatMeters(selectedLevel?.clearHeight)],
+    ["천정속", formatMeters(selectedLevel?.ceilingVoid)],
+    ["보 깊이", formatMeters(selectedLevel?.beamDepth)]
+  ]);
+
+  els.buildingInsight.innerHTML = renderDefinitionRows([
+    ["전체 층수", `${formatInteger(activeSummary.levelCount)}개 층`],
+    ["총 높이", formatMeters(activeSummary.totalHeight)],
+    ["외곽", `${formatMeters(plan.width)} x ${formatMeters(plan.depth)}`],
+    ["외벽 두께", formatMeters(plan.perimeterWallThickness || 0)],
+    ["기둥", `${formatMeters(plan.columnSize || 0)} x ${formatMeters(plan.columnSize || 0)}`],
+    ["X 그리드", averageSpacingLabel(plan.gridX)],
+    ["Y 그리드", averageSpacingLabel(plan.gridZ)],
+    ["코어", core ? `${formatMeters(core.width)} x ${formatMeters(core.depth)}` : "-"],
+    ["EV / 계단 / MEP", core ? `${formatInteger(core.elevators || 0)} / ${formatInteger(core.stairs || 0)} / ${formatInteger(core.risers || 0)}` : "-"],
+    plan.dockDoors ? ["도크", `${formatInteger(plan.dockDoors)}개`] : null,
+    plan.rackRows ? ["랙 구역", `${formatInteger(plan.rackRows)}열`] : null
+  ]);
+
+  els.drawingInsight.innerHTML = renderDefinitionRows([
+    ["원천", source.fileName || asset?.sourceFiles?.[0]?.name || "-"],
+    ["PDF 페이지", source.pageCount ? `${formatInteger(source.pageCount)}p` : "-"],
+    ["추출층", source.extractedFloorTitles?.length ? `${formatInteger(source.extractedFloorTitles.length)}개` : "-"],
+    ["웹 도면", vectorPackage ? `${formatInteger(vectorPackage.pageCount)}p 벡터화` : reviewStatusLabel(asset?.drawingReview?.status)],
+    ["캘리브레이션", drawingState.review?.calibration?.scaleLabel || "검토 필요"],
+    ["모델 상태", reviewStatusLabel(asset?.modelReview?.status)]
+  ]);
+}
+
+function getSelectedLevelSnapshot() {
+  const selectedSourceLevelId = String(state.options.labelLevelId || "").split(":")[0];
+  const level =
+    state.model.levels.find((item) => item.id === selectedSourceLevelId) ||
+    state.model.levels.find((item) => item.use === activeUseFallback()) ||
+    state.model.levels[0] ||
+    {};
+  return {
+    ...level,
+    floorToFloorHeight: getLevelValue(state.model, level, state.scenarioId, "floorToFloorHeight"),
+    finishedCeilingHeight: getLevelValue(state.model, level, state.scenarioId, "finishedCeilingHeight"),
+    clearHeight: getLevelValue(state.model, level, state.scenarioId, "clearHeight"),
+    slabDepth: getLevelValue(state.model, level, state.scenarioId, "slabDepth"),
+    beamDepth: getLevelValue(state.model, level, state.scenarioId, "beamDepth"),
+    ceilingVoid: getLevelValue(state.model, level, state.scenarioId, "ceilingVoid")
+  };
+}
+
+function activeUseFallback() {
+  return state.model.buildingType === "logistics" ? "logistics" : "office";
+}
+
+function renderDefinitionRows(rows) {
+  return rows
+    .filter(Boolean)
+    .map(([label, value]) => `<div><dt>${label}</dt><dd>${value ?? "-"}</dd></div>`)
+    .join("");
+}
+
+function averageSpacingLabel(values = []) {
+  const sorted = [...values].map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+  if (sorted.length < 2) return "-";
+  const diffs = [];
+  for (let index = 1; index < sorted.length; index += 1) {
+    diffs.push(Math.abs(sorted[index] - sorted[index - 1]));
+  }
+  const average = diffs.reduce((sum, value) => sum + value, 0) / diffs.length;
+  return `약 ${formatMeters(average)}`;
+}
+
+async function openSnapshotPreview() {
+  if (drawingState.stage !== "model") {
+    drawingState.stage = "model";
+    syncStage();
+  }
+  els.snapshot.disabled = true;
+  els.snapshotPreviewDownload.disabled = true;
+  try {
+    const reviewViewer = getViewer();
+    reviewViewer.setCameraPreset(state.activeShot);
+    if (state.options.focusLevelActive) focusSelectedLevel();
+    await nextAnimationFrame();
+    const blob = await reviewViewer.capturePngBlob();
+    if (snapshotPreviewState.objectUrl) URL.revokeObjectURL(snapshotPreviewState.objectUrl);
+    snapshotPreviewState.objectUrl = URL.createObjectURL(blob);
+    snapshotPreviewState.filename = snapshotName(state.activeShot);
+    els.snapshotPreviewImage.src = snapshotPreviewState.objectUrl;
+    els.snapshotPreviewMeta.textContent = `${getActiveAsset()?.name || state.model.name} · ${shotLabel(state.activeShot)}`;
+    els.snapshotPreview.classList.remove("is-hidden");
+    els.snapshotPreview.hidden = false;
+    els.snapshotPreviewDownload.disabled = false;
+  } finally {
+    els.snapshot.disabled = false;
+  }
+}
+
+function closeSnapshotPreview() {
+  els.snapshotPreview.classList.add("is-hidden");
+  els.snapshotPreview.hidden = true;
+  els.snapshotPreviewImage.removeAttribute("src");
+  if (snapshotPreviewState.objectUrl) URL.revokeObjectURL(snapshotPreviewState.objectUrl);
+  snapshotPreviewState.objectUrl = "";
+  snapshotPreviewState.filename = "";
+}
+
+function downloadSnapshotPreview() {
+  if (!snapshotPreviewState.objectUrl) return;
+  const link = document.createElement("a");
+  link.download = snapshotPreviewState.filename || snapshotName(state.activeShot);
+  link.href = snapshotPreviewState.objectUrl;
+  link.click();
+}
+
+function nextAnimationFrame() {
+  return new Promise((resolve) => {
+    window.requestAnimationFrame(() => window.requestAnimationFrame(resolve));
+  });
+}
+
+function shotLabel(shot) {
+  return (
+    {
+      perspective: "투시",
+      elevation: "입면",
+      section: "단면",
+      top: "평면"
+    }[shot] || "투시"
+  );
 }
 
 function exportCurrentModel() {
