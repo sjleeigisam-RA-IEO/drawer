@@ -1,5 +1,5 @@
-import { samples } from "./samples.js?v=core-details-1";
-import { assetLibrary } from "./asset-library.js?v=core-details-1";
+import { samples } from "./samples.js?v=number-format-1";
+import { assetLibrary } from "./asset-library.js?v=number-format-1";
 import {
   cloneModel,
   duplicateScenario,
@@ -10,15 +10,15 @@ import {
   normalizeModel,
   setScenarioLevelValue,
   summarizeModel
-} from "./schema.js?v=core-details-1";
+} from "./schema.js?v=number-format-1";
 import {
   createDrawingReview,
   markReviewPublished,
   normalizeVectorPackage,
   reviewStatusLabel
-} from "./drawing-schema.js?v=core-details-1";
-import { createReviewModel } from "./modeler.js?v=core-details-1";
-import { ReviewViewer } from "./viewer.js?v=core-details-1";
+} from "./drawing-schema.js?v=number-format-1";
+import { createReviewModel } from "./modeler.js?v=number-format-1";
+import { ReviewViewer } from "./viewer.js?v=number-format-1";
 
 const APP_BOOT_ID = Date.now().toString(36);
 const APP_BASE_URL = new URL("../", import.meta.url);
@@ -458,15 +458,15 @@ function renderUploadStatus() {
   const sizeMb = state.stagedUpload.size / 1024 / 1024;
   els.uploadLabel.textContent = state.stagedUpload.name;
   if (state.uploadState === "loaded-json") {
-    els.uploadStatus.textContent = `${state.stagedUpload.kind.toUpperCase()} · ${sizeMb.toFixed(2)}MB · normalized model loaded`;
+    els.uploadStatus.textContent = `${state.stagedUpload.kind.toUpperCase()} · ${formatNumber(sizeMb)}MB · normalized model loaded`;
     els.uploadStatus.classList.add("ready");
     els.queueExtraction.disabled = true;
   } else if (state.uploadState === "invalid-json") {
-    els.uploadStatus.textContent = `${state.stagedUpload.kind.toUpperCase()} · ${sizeMb.toFixed(2)}MB · JSON 구조 확인 필요`;
+    els.uploadStatus.textContent = `${state.stagedUpload.kind.toUpperCase()} · ${formatNumber(sizeMb)}MB · JSON 구조 확인 필요`;
     els.uploadStatus.classList.add("warning");
     els.queueExtraction.disabled = true;
   } else {
-    els.uploadStatus.textContent = `${state.stagedUpload.kind.toUpperCase()} · ${sizeMb.toFixed(2)}MB · 파서 연결 전`;
+    els.uploadStatus.textContent = `${state.stagedUpload.kind.toUpperCase()} · ${formatNumber(sizeMb)}MB · 파서 연결 전`;
     els.uploadStatus.classList.add("warning");
     els.queueExtraction.disabled = true;
   }
@@ -506,7 +506,10 @@ async function loadDrawingManifestForActiveAsset() {
     drawingState.manifestUrl = manifestUrl;
     drawingState.loading = false;
     els.drawingPageSelect.innerHTML = drawingState.vectorPackage.pages
-      .map((page, index) => `<option value="${index}">${page.index}. ${page.title} (${page.drawingCount})</option>`)
+      .map(
+        (page, index) =>
+          `<option value="${index}">${formatInteger(page.index)}. ${page.title} (${formatInteger(page.drawingCount)})</option>`
+      )
       .join("");
     els.drawingPageSelect.disabled = false;
     renderDrawingReviewStatus();
@@ -549,7 +552,7 @@ function clearDrawingImage(message) {
 }
 
 function renderDrawingZoom() {
-  els.zoomValue.textContent = `${Math.round(drawingState.zoom * 100)}%`;
+  els.zoomValue.textContent = `${formatInteger(Math.round(drawingState.zoom * 100))}%`;
   els.drawingViewport.style.setProperty("--drawing-width", `${drawingState.zoom * 100}%`);
 }
 
@@ -559,7 +562,7 @@ function renderDrawingReviewStatus() {
   els.vectorPackageStatus.textContent = drawingState.loading
     ? "로드 중"
     : vectorPackage
-    ? `${vectorPackage.pageCount}p · ${vectorPackage.id}`
+    ? `${formatInteger(vectorPackage.pageCount)}p · ${vectorPackage.id}`
     : drawingState.error
     ? "로드 실패"
     : "벡터 패키지 없음";
@@ -567,7 +570,7 @@ function renderDrawingReviewStatus() {
     ? `${reviewStatusLabel(review.calibration.status)}${review.calibration.scaleLabel ? ` · ${review.calibration.scaleLabel}` : ""}`
     : "대기";
   els.validationStatus.textContent = review
-    ? `${reviewStatusLabel(review.status)} · 후보 ${review.validatedSpaceCandidates.length} · 주석 ${review.annotationCount}`
+    ? `${reviewStatusLabel(review.status)} · 후보 ${formatInteger(review.validatedSpaceCandidates.length)} · 주석 ${formatInteger(review.annotationCount)}`
     : "대기";
   els.publishModel.disabled = !vectorPackage;
   els.publishModel.textContent = review?.publishedModelId ? "3D 모델 게시됨" : "3D 모델로 게시";
@@ -602,7 +605,7 @@ function renderLevelTable() {
                 min="${field.min}"
                 max="${field.max}"
                 step="${field.step}"
-                value="${formatNumber(value)}"
+                value="${value}"
                 data-level="${level.id}"
                 data-field="${field.key}"
                 aria-label="${level.name} ${field.label}"
@@ -616,7 +619,7 @@ function renderLevelTable() {
         <tr>
           <td><span class="level-name">${level.name}</span></td>
           <td><span class="use-pill">${useLabel(level.use)}</span></td>
-          <td>${level.count || 1}</td>
+          <td>${formatInteger(level.count || 1)}</td>
           ${cells}
         </tr>
       `;
@@ -698,15 +701,15 @@ function renderMetrics() {
   const clearDelta = active.representativeClear - base.representativeClear;
 
   const metricItems = [
-    ["총 높이", `${formatNumber(active.totalHeight)}m`, heightDelta],
-    ["층수", `${active.levelCount}`, 0],
-    ["대표 천정고", active.representativeCeiling ? `${formatNumber(active.representativeCeiling)}m` : "-", ceilingDelta],
-    ["대표 유효고", active.representativeClear ? `${formatNumber(active.representativeClear)}m` : "-", clearDelta]
+    ["총 높이", formatMeters(active.totalHeight), heightDelta],
+    ["층수", formatInteger(active.levelCount), 0],
+    ["대표 천정고", active.representativeCeiling ? formatMeters(active.representativeCeiling) : "-", ceilingDelta],
+    ["대표 유효고", active.representativeClear ? formatMeters(active.representativeClear) : "-", clearDelta]
   ];
 
   els.metrics.innerHTML = metricItems
     .map(([label, value, delta]) => {
-      const deltaText = delta ? `<span class="metric-delta">${delta > 0 ? "+" : ""}${formatNumber(delta)}m</span>` : "";
+      const deltaText = delta ? `<span class="metric-delta">${formatSignedMeters(delta)}</span>` : "";
       return `
         <div class="metric-tile">
           <span class="metric-label">${label}</span>
@@ -722,7 +725,7 @@ function renderMetrics() {
     ["자산", assetLabel],
     ["용도", useLabel(active.representativeUse)],
     ["도면 단위", state.model.units],
-    ["평면", `${state.model.plan.width}m x ${state.model.plan.depth}m`]
+    ["평면", `${formatMeters(state.model.plan.width)} x ${formatMeters(state.model.plan.depth)} (${formatArea(planFloorArea(state.model.plan))})`]
   ]
     .map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`)
     .join("");
@@ -813,7 +816,47 @@ async function loadUploadedJson(file) {
 }
 
 function formatNumber(value) {
-  return Number(value || 0).toFixed(2).replace(/\.00$/, "").replace(/0$/, "");
+  const numeric = Number(value || 0);
+  const fractionDigits = Math.abs(numeric) >= 100 ? 1 : 2;
+  return numeric.toLocaleString("ko-KR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: fractionDigits
+  });
+}
+
+function formatInteger(value) {
+  return Number(value || 0).toLocaleString("ko-KR", { maximumFractionDigits: 0 });
+}
+
+function formatMeters(value) {
+  return `${formatNumber(value)}m`;
+}
+
+function formatSignedMeters(value) {
+  const numeric = Number(value || 0);
+  if (!numeric) return formatMeters(0);
+  return `${numeric > 0 ? "+" : "-"}${formatMeters(Math.abs(numeric))}`;
+}
+
+function formatArea(value) {
+  const sqm = Number(value || 0);
+  const pyeong = sqm / 3.305785;
+  return `${formatNumber(sqm)}㎡ / ${formatNumber(pyeong)}평`;
+}
+
+function planFloorArea(plan) {
+  if (Array.isArray(plan.outline) && plan.outline.length >= 3) return polygonArea(plan.outline);
+  return Number(plan.width || 0) * Number(plan.depth || 0);
+}
+
+function polygonArea(points) {
+  let area = 0;
+  for (let index = 0; index < points.length; index += 1) {
+    const [x1, z1] = points[index];
+    const [x2, z2] = points[(index + 1) % points.length];
+    area += x1 * z2 - x2 * z1;
+  }
+  return Math.abs(area) / 2;
 }
 
 if (!shouldRedirectToHttpRuntime) {

@@ -298,6 +298,9 @@ function createColumnHoverInfo(plan, level, size, height) {
 function createCoreHoverInfo(plan, level) {
   const core = plan.core;
   if (!core) return null;
+  const elevatorCount = formatInteger(core.elevators || 0);
+  const stairCount = formatInteger(core.stairs || 0);
+  const riserCount = formatInteger(core.risers || 0);
   return {
     title: `코어 · ${hoverLevelName(level)}`,
     accent: "#e5a85f",
@@ -305,7 +308,7 @@ function createCoreHoverInfo(plan, level) {
     rows: [
       { label: "코어 크기", value: `${formatMeters(core.width)} x ${formatMeters(core.depth)}` },
       { label: "층 높이", value: formatMeters(level.floorToFloorHeight - (level.slabDepth || 0.25)) },
-      { label: "EV / ST / MEP", value: `${core.elevators || 0} / ${core.stairs || 0} / ${core.risers || 0}` }
+      { label: "EV / ST / MEP", value: `${elevatorCount} / ${stairCount} / ${riserCount}` }
     ]
   };
 }
@@ -433,7 +436,8 @@ function polygonArea(points) {
 
 function formatArea(value) {
   const numeric = Number(value || 0);
-  return `${numeric.toFixed(1).replace(/\.0$/, "")}m2`;
+  const pyeong = numeric / 3.305785;
+  return `${formatNumber(numeric)}㎡ / ${formatNumber(pyeong)}평`;
 }
 
 function addColumns(root, plan, level, depth, zOffset) {
@@ -829,7 +833,7 @@ function addCoreDetailRooms(root, plan, level, zOffset, height, visibleDepth, op
     const evInfo = createGenericHoverInfo(`Elevator · ${hoverLevelName(level)}`, [
       { label: "Cab / shaft", value: `${formatMeters(elevatorW)} x ${formatMeters(elevatorD)}` },
       { label: "Travel height", value: formatMeters(detailHeight) },
-      { label: "Bank count", value: String(elevatorCount) }
+      { label: "Bank count", value: formatInteger(elevatorCount) }
     ], "#8caec4", 6);
     addBox(root, elevatorW, detailHeight, elevatorD, x, roomY, z, materials.shaft, "elevator-shaft", evInfo);
     addBox(root, elevatorW * 0.82, options.planView ? 0.06 : Math.min(2.1, detailHeight * 0.58), 0.08, x, options.planView ? floorY + 0.05 : baseY + Math.min(1.15, detailHeight * 0.36), z + elevatorD / 2 + 0.055, materials.elevatorCab, "elevator-door", evInfo);
@@ -844,7 +848,7 @@ function addCoreDetailRooms(root, plan, level, zOffset, height, visibleDepth, op
     const z = front - stairD / 2 - 0.75;
     const stairInfo = createGenericHoverInfo(`Stair · ${hoverLevelName(level)}`, [
       { label: "Room", value: `${formatMeters(stairW)} x ${formatMeters(stairD)}` },
-      { label: "Flights", value: detailHeight > 4.8 ? "2" : "1" }
+      { label: "Flights", value: formatInteger(detailHeight > 4.8 ? 2 : 1) }
     ], "#c58f5a", 6);
     addBox(root, stairW, detailHeight, stairD, x, roomY, z, materials.shaft, "stair-core", stairInfo);
     addStairTreads(root, x, baseY + (options.planView ? 0.28 : 0.42), z, stairW, stairD, options.planView ? 0.018 : 0.055);
@@ -916,7 +920,7 @@ function addCoreVerticalShafts(root, plan, level, zOffset) {
   const left = core.x - core.width / 2;
   const back = core.z + zOffset - core.depth / 2;
   const shaftHeight = height * 0.96;
-  addBox(root, 1.1, shaftHeight, 1.2, left + 1.4, baseY, back + 1.4, materials.shaft, "elevator-shaft-volume", createGenericHoverInfo(`EV 샤프트 · ${hoverLevelName(level)}`, [{ label: "샤프트 높이", value: formatMeters(shaftHeight) }, { label: "크기", value: "1.1m x 1.2m" }], "#e5a85f", 4));
+  addBox(root, 1.1, shaftHeight, 1.2, left + 1.4, baseY, back + 1.4, materials.shaft, "elevator-shaft-volume", createGenericHoverInfo(`EV 샤프트 · ${hoverLevelName(level)}`, [{ label: "샤프트 높이", value: formatMeters(shaftHeight) }, { label: "크기", value: `${formatMeters(1.1)} x ${formatMeters(1.2)}` }], "#e5a85f", 4));
   addBox(root, 0.72, shaftHeight, 0.86, left + core.width - 1.4, baseY, back + core.depth - 1.2, materials.duct, "mep-riser-volume", createServiceHoverInfo(level, "mep-riser-volume", 0.72, shaftHeight, 0.86));
 }
 
@@ -945,7 +949,7 @@ function addDockWall(root, plan, level, depth, zOffset) {
   const z = zOffset + depth / 2 + 0.08;
   for (let index = 0; index < dockCount; index += 1) {
     const x = -plan.width / 2 + gap * index + gap / 2;
-    addBox(root, doorWidth, 2.8, 0.18, x, y, z, materials.dock, "dock-door", createGenericHoverInfo(`도크 도어 · ${hoverLevelName(level)}`, [{ label: "도어 크기", value: `${formatMeters(doorWidth)} x 2.8m` }, { label: "도크 높이", value: formatMeters(level.dockHeight || 1.2) }], "#d49a4b", 3));
+    addBox(root, doorWidth, 2.8, 0.18, x, y, z, materials.dock, "dock-door", createGenericHoverInfo(`도크 도어 · ${hoverLevelName(level)}`, [{ label: "도어 크기", value: `${formatMeters(doorWidth)} x ${formatMeters(2.8)}` }, { label: "도크 높이", value: formatMeters(level.dockHeight || 1.2) }], "#d49a4b", 3));
   }
 }
 
@@ -1055,16 +1059,19 @@ function addPlanValueLabels(root, plan, level) {
   const y = level.y + (level.slabDepth || 0.12) + 1.05;
   addLabelSprite(
     root,
-    ["평면", `${formatMeters(plan.width)} x ${formatMeters(plan.depth)}`],
+    ["평면", `${formatMeters(plan.width)} x ${formatMeters(plan.depth)}`, formatArea(planFloorArea(plan))],
     [0, y, plan.depth / 2 + 2.6],
-    { accent: "#f4d074", width: 7.2, height: 1.8 }
+    { accent: "#f4d074", width: 7.8, height: 2.05 }
   );
 
   if (plan.core) {
     const core = plan.core;
+    const elevatorCount = formatInteger(core.elevators || 0);
+    const stairCount = formatInteger(core.stairs || 0);
+    const riserCount = formatInteger(core.risers || 0);
     addLabelSprite(
       root,
-      ["코어", `${formatMeters(core.width)} x ${formatMeters(core.depth)}`, `EV ${core.elevators || 0} · ST ${core.stairs || 0} · MEP ${core.risers || 0}`],
+      ["코어", `${formatMeters(core.width)} x ${formatMeters(core.depth)}`, `EV ${elevatorCount} · ST ${stairCount} · MEP ${riserCount}`],
       [core.x + core.width / 2 + 3.3, y + 0.15, core.z],
       { accent: "#e5a85f", width: 7.1, height: 2.05 }
     );
@@ -1172,7 +1179,7 @@ function levelDisplayName(level, groupCount) {
     const floor = Number(range[1]) + level.instanceIndex;
     if (floor <= Number(range[2])) return `${floor}F`;
   }
-  return groupCount > 1 ? `${baseName} x${groupCount}` : level.name;
+  return groupCount > 1 ? `${baseName} x${formatInteger(groupCount)}` : level.name;
 }
 
 function addDimensionLine(root, start, end, isGuide) {
@@ -1270,8 +1277,18 @@ function drawRoundRect(ctx, x, y, width, height, radius, fill, stroke) {
 }
 
 function formatMeters(value) {
+  return `${formatNumber(value)}m`;
+}
+
+function formatNumber(value) {
   const numeric = Number(value || 0);
-  return `${numeric.toFixed(2).replace(/\.00$/, "").replace(/0$/, "")}m`;
+  return numeric.toLocaleString("ko-KR", {
+    maximumFractionDigits: Math.abs(numeric) >= 100 ? 1 : 2
+  });
+}
+
+function formatInteger(value) {
+  return Number(value || 0).toLocaleString("ko-KR", { maximumFractionDigits: 0 });
 }
 
 function addBox(root, width, height, depth, x, y, z, material, name, hoverInfo = null) {
