@@ -303,8 +303,10 @@ export class ReviewViewer {
     }
     this.hoverTooltip.appendChild(list);
 
-    const maxX = Math.max(this.container.clientWidth - 280, 8);
-    const maxY = Math.max(this.container.clientHeight - 170, 8);
+    const tooltipWidth = this.hoverTooltip.offsetWidth || 420;
+    const tooltipHeight = this.hoverTooltip.offsetHeight || 170;
+    const maxX = Math.max(this.container.clientWidth - tooltipWidth - 8, 8);
+    const maxY = Math.max(this.container.clientHeight - tooltipHeight - 8, 8);
     this.hoverTooltip.style.left = `${Math.min(Math.max(x + 14, 8), maxX)}px`;
     this.hoverTooltip.style.top = `${Math.min(Math.max(y + 14, 8), maxY)}px`;
     this.hoverTooltip.classList.remove("is-hidden");
