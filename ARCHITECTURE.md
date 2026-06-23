@@ -99,7 +99,7 @@ type Space = {
 type AreaZone = {
   id: string;
   name: string;
-  type: "warehouse" | "ramp" | "core" | "restroom" | "elevator" | "stair" | "common" | "dock" | "office";
+  type: "gross" | "warehouse" | "ramp" | "core" | "restroom" | "elevator" | "stair" | "common" | "dock" | "office";
   levelIds?: string[];
   x?: number;
   z?: number;
@@ -191,8 +191,9 @@ viewer. Do not encode hypothetical separating elements, such as a ramp or
 east/west warehouse split, unless the reviewed drawing confirms them. These
 values are not certified GFA/NLA/rentable areas; overlapping core sub-zones such
 as elevator, restroom, stair, and common corridor are allowed for visual review
-and should not be blindly summed. Zones with `provenance: "assumption"` or
-`visible: false` are excluded from the left panel and 3D overlays by default.
+and should not be blindly summed. Geometry records with `provenance: "assumption"`
+or `visible: false` are excluded from default review rendering, including
+`plan.areaZones[]`, `plan.features[]`, and procedural `plan.core`.
 
 ## Asset Mapping
 

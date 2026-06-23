@@ -780,7 +780,7 @@ function renderMetrics() {
 function renderInsightPanels(activeSummary) {
   const selectedLevel = getSelectedLevelSnapshot();
   const plan = state.model.plan || {};
-  const core = plan.core || null;
+  const core = modelCoreIsDisplayable(plan.core) ? plan.core : null;
   const source = state.model.source || {};
   const asset = getActiveAsset();
   const vectorPackage = drawingState.vectorPackage;
@@ -921,7 +921,15 @@ function getAreaZonesForLevel(plan, levelId) {
 }
 
 function zoneIsDisplayable(zone) {
-  return zone?.visible !== false && zone?.provenance !== "assumption";
+  return reviewGeometryIsDisplayable(zone);
+}
+
+function modelCoreIsDisplayable(core) {
+  return Boolean(core) && reviewGeometryIsDisplayable(core);
+}
+
+function reviewGeometryIsDisplayable(item) {
+  return item?.visible !== false && item?.provenance !== "assumption";
 }
 
 function zoneAppliesToLevel(zone, levelId) {
@@ -953,7 +961,8 @@ function zoneTypeLabel(type) {
       stair: "계단실",
       common: "공용부",
       dock: "도크",
-      office: "전용부"
+      office: "전용부",
+      gross: "전체"
     }[type] || "구획"
   );
 }

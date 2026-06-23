@@ -309,7 +309,7 @@ function createColumnHoverInfo(plan, level, size, height) {
 
 function createCoreHoverInfo(plan, level) {
   const core = plan.core;
-  if (!core) return null;
+  if (!coreIsDisplayable(core)) return null;
   const elevatorCount = formatInteger(core.elevators || 0);
   const stairCount = formatInteger(core.stairs || 0);
   const riserCount = formatInteger(core.risers || 0);
@@ -482,7 +482,7 @@ function addColumns(root, plan, level, depth, zOffset) {
 }
 
 function addCore(root, plan, level, depth, zOffset, options = {}) {
-  if (!plan.core) return;
+  if (!coreIsDisplayable(plan.core)) return;
   const core = plan.core;
   if (Math.abs(core.z) > depth / 2) return;
   if (options.planView) {
@@ -979,6 +979,7 @@ function addLogisticsDetails(root, plan, level, options) {
 function addPlanFeatures(root, plan, level, zOffset) {
   if (!Array.isArray(plan.features)) return;
   for (const feature of plan.features) {
+    if (!reviewGeometryIsDisplayable(feature)) continue;
     if (feature.levelIds && !feature.levelIds.includes(level.sourceLevelId)) continue;
     const material = feature.material === "dock" ? materials.dock : materials.core;
     addBox(
@@ -1060,7 +1061,15 @@ function areaZoneAppliesToLevel(zone, levelId) {
 }
 
 function areaZoneIsDisplayable(zone) {
-  return zone?.visible !== false && zone?.provenance !== "assumption";
+  return reviewGeometryIsDisplayable(zone);
+}
+
+function coreIsDisplayable(core) {
+  return Boolean(core) && reviewGeometryIsDisplayable(core);
+}
+
+function reviewGeometryIsDisplayable(item) {
+  return item?.visible !== false && item?.provenance !== "assumption";
 }
 
 function createAreaZoneHoverInfo(plan, zone, area, level) {
@@ -1106,7 +1115,8 @@ function areaZoneTypeLabel(type) {
       stair: "계단실",
       common: "공용부",
       dock: "도크",
-      office: "전용부"
+      office: "전용부",
+      gross: "전체"
     }[type] || "구획"
   );
 }
@@ -1242,7 +1252,7 @@ function addPlanValueLabels(root, plan, level) {
     { accent: "#f4d074", width: 7.8, height: 2.05 }
   );
 
-  if (plan.core) {
+  if (coreIsDisplayable(plan.core)) {
     const core = plan.core;
     const elevatorCount = formatInteger(core.elevators || 0);
     const stairCount = formatInteger(core.stairs || 0);
