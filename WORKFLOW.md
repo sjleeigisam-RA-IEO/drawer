@@ -70,9 +70,11 @@ Use model-meter coordinates from the reviewed drawing dimensions:
 - applicable floors: `levelIds`
 - review note: `sourceNote`
 
-Use this for ramp area, east/west or north/south warehouse area, dock apron,
-core, elevator, restroom, stair, and common-corridor estimates. The viewer will
-calculate `㎡ / 평` and show purple overlays from the same records.
+Use this for confirmed warehouse/work area, dock apron, core, elevator,
+restroom, stair, and common-corridor estimates. Only add ramp areas or
+east/west / north/south warehouse splits when the reviewed drawing actually
+shows that separating element. The viewer will calculate `㎡ / 평` and show
+purple overlays from the same records.
 
 Do not present generated 3D geometry as certified BIM. The source of truth is the validated drawing package plus the model JSON.
 

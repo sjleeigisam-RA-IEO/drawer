@@ -185,9 +185,11 @@ Zone area analysis is stored as `plan.areaZones[]`. Each zone is a drawing-dimen
 review layer in model meters, either a rectangle (`x`, `z`, `width`, `depth`) or a
 polygon (`points`). The app calculates `㎡ / 평`, shows the basis note in the
 left review panel, and renders the same zones as purple overlays in the 3D/plan
-viewer. These values are not certified GFA/NLA/rentable areas; overlapping core
-sub-zones such as elevator, restroom, stair, and common corridor are allowed for
-visual review and should not be blindly summed.
+viewer. Do not encode hypothetical separating elements, such as a ramp or
+east/west warehouse split, unless the reviewed drawing confirms them. These
+values are not certified GFA/NLA/rentable areas; overlapping core sub-zones such
+as elevator, restroom, stair, and common corridor are allowed for visual review
+and should not be blindly summed.
 
 ## Asset Mapping
 

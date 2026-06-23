@@ -42,7 +42,7 @@ Fixed metric cards were removed from the model surface. Metrics now appear as ho
 - slab/ceiling/service: relevant vertical build-up values
 - area zones: estimated sqm/pyeong, zone type, footprint ratio, and drawing-based source note
 
-Area-zone fills and cards stay neutral by default. Purple is reserved for the current hover or selected zone, so the user reads it as a state cue rather than a permanent drawing layer.
+Area-zone fills and cards stay neutral by default. Purple is reserved for the current hover or selected zone, so the user reads it as a state cue rather than a permanent drawing layer. Assumed geometry should not be drawn as a zone; only drawing-confirmed or explicitly reviewed areas belong in the default model.
 
 ## Visual Semantics
 

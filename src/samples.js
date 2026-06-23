@@ -436,40 +436,18 @@ export const samples = [
             depth: 3.5
           }
         ],
-        areaBasisNote: "준공 PDF 평면도에서 샘플링한 외곽 229.3m x 92m, 코어, 도크, 램프 치수 기반 검토용 산정",
+        areaBasisNote: "준공 PDF 평면도에서 샘플링한 외곽 229.3m x 92m, 코어, 도크 치수 기반 검토용 산정",
         areaZones: [
           {
-            id: "gangnam-west-warehouse",
-            name: "서측 창고영역",
+            id: "gangnam-warehouse-main",
+            name: "창고/작업장 영역",
             type: "warehouse",
             levelIds: ["b1", "warehouse1", "warehouseUpper"],
-            x: -57,
+            x: 0,
             z: 1,
-            width: 88,
+            width: 206,
             depth: 72,
-            sourceNote: "외곽/램프 분리선 기반"
-          },
-          {
-            id: "gangnam-east-warehouse",
-            name: "동측 창고영역",
-            type: "warehouse",
-            levelIds: ["b1", "warehouse1", "warehouseUpper"],
-            x: 53,
-            z: 1,
-            width: 98,
-            depth: 72,
-            sourceNote: "외곽/램프 분리선 기반"
-          },
-          {
-            id: "gangnam-central-ramp",
-            name: "중앙 램프/차로",
-            type: "ramp",
-            levelIds: ["warehouse1", "warehouseUpper"],
-            x: -3,
-            z: 0,
-            width: 18,
-            depth: 82,
-            sourceNote: "동서 창고 분리 램프 가정"
+            sourceNote: "중앙 램프 미확인, 단일 창고영역으로 검토"
           },
           {
             id: "gangnam-dock-apron-zone",
@@ -686,40 +664,18 @@ export const samples = [
             depth: 3.3
           }
         ],
-        areaBasisNote: "준공 PDF 평면도에서 샘플링한 외곽 188m x 84m, 코어, 도크, 램프 치수 기반 검토용 산정",
+        areaBasisNote: "준공 PDF 평면도에서 샘플링한 외곽 188m x 84m, 코어, 도크 치수 기반 검토용 산정",
         areaZones: [
           {
-            id: "dongsan-west-warehouse",
-            name: "서측 창고영역",
+            id: "dongsan-warehouse-main",
+            name: "창고/작업장 영역",
             type: "warehouse",
             levelIds: ["b1", "warehouse1", "warehouseUpper"],
-            x: -48,
+            x: 0,
             z: 1,
-            width: 70,
+            width: 164,
             depth: 66,
-            sourceNote: "외곽/램프 분리선 기반"
-          },
-          {
-            id: "dongsan-east-warehouse",
-            name: "동측 창고영역",
-            type: "warehouse",
-            levelIds: ["b1", "warehouse1", "warehouseUpper"],
-            x: 41,
-            z: 1,
-            width: 78,
-            depth: 66,
-            sourceNote: "외곽/램프 분리선 기반"
-          },
-          {
-            id: "dongsan-central-ramp",
-            name: "중앙 램프/차로",
-            type: "ramp",
-            levelIds: ["warehouse1", "warehouseUpper"],
-            x: -4,
-            z: 0,
-            width: 16,
-            depth: 74,
-            sourceNote: "동서 창고 분리 램프 가정"
+            sourceNote: "중앙 램프 미확인, 단일 창고영역으로 검토"
           },
           {
             id: "dongsan-dock-apron-zone",
