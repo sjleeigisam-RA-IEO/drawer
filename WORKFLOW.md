@@ -69,6 +69,9 @@ Use model-meter coordinates from the reviewed drawing dimensions:
 - optional verified area override: `area`
 - applicable floors: `levelIds`
 - review note: `sourceNote`
+- provenance: use `drawing` or `reviewed` for default-visible zones; use
+  `assumption` or `visible: false` for ideas that should not appear in the
+  default review model
 
 Use this for confirmed warehouse/work area, dock apron, core, elevator,
 restroom, stair, and common-corridor estimates. Only add ramp areas or

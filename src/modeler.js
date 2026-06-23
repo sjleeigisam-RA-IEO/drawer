@@ -1001,7 +1001,9 @@ function addPlanFeatures(root, plan, level, zOffset) {
 
 function addAreaZones(root, plan, level, zOffset, options = {}) {
   if (!Array.isArray(plan.areaZones) || !plan.areaZones.length) return;
-  const zones = plan.areaZones.filter((zone) => areaZoneAppliesToLevel(zone, level.sourceLevelId));
+  const zones = plan.areaZones
+    .filter((zone) => areaZoneIsDisplayable(zone))
+    .filter((zone) => areaZoneAppliesToLevel(zone, level.sourceLevelId));
   if (!zones.length) return;
   const y = level.y + (level.slabDepth || 0.12) + 0.052;
   const shouldLabel = false;
@@ -1055,6 +1057,10 @@ function addAreaZones(root, plan, level, zOffset, options = {}) {
 function areaZoneAppliesToLevel(zone, levelId) {
   if (!Array.isArray(zone.levelIds) || !zone.levelIds.length) return true;
   return zone.levelIds.includes(levelId);
+}
+
+function areaZoneIsDisplayable(zone) {
+  return zone?.visible !== false && zone?.provenance !== "assumption";
 }
 
 function createAreaZoneHoverInfo(plan, zone, area, level) {

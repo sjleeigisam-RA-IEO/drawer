@@ -107,6 +107,8 @@ type AreaZone = {
   depth?: number;
   points?: Array<[number, number]>;
   area?: number;
+  provenance?: "drawing" | "reviewed" | "assumption";
+  visible?: boolean;
   sourceNote?: string;
 };
 
@@ -189,7 +191,8 @@ viewer. Do not encode hypothetical separating elements, such as a ramp or
 east/west warehouse split, unless the reviewed drawing confirms them. These
 values are not certified GFA/NLA/rentable areas; overlapping core sub-zones such
 as elevator, restroom, stair, and common corridor are allowed for visual review
-and should not be blindly summed.
+and should not be blindly summed. Zones with `provenance: "assumption"` or
+`visible: false` are excluded from the left panel and 3D overlays by default.
 
 ## Asset Mapping
 

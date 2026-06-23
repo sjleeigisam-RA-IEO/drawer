@@ -915,8 +915,13 @@ function syncZoneAreaCards() {
 
 function getAreaZonesForLevel(plan, levelId) {
   return (plan.areaZones || [])
+    .filter((zone) => zoneIsDisplayable(zone))
     .filter((zone) => zoneAppliesToLevel(zone, levelId))
     .filter((zone) => zoneArea(zone) > 0);
+}
+
+function zoneIsDisplayable(zone) {
+  return zone?.visible !== false && zone?.provenance !== "assumption";
 }
 
 function zoneAppliesToLevel(zone, levelId) {
